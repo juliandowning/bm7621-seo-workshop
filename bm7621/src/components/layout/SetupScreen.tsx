@@ -103,7 +103,7 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
                   value={code}
                   onChange={e => setCode(e.target.value.toUpperCase())}
                   onKeyDown={e => e.key === 'Enter' && handleCode()}
-                  maxLength={12}
+                  maxLength={14}
                   autoFocus
                 />
               </div>
