@@ -30,8 +30,8 @@ export const ACTIVITY_ORDER: ActivityKey[] = [
   'a4', 'a5',
   'a6', 'a7', 'sim2',
   'a9', 'a8', 'a10', 'a10b',
-  'a11', 'a12', 'a12b', 'a13', 'sim3',
-  'a14', 'a15', 'sim4', 'sim5',
+  'a11', 'a12', 'a12b', 'sim4', 'a13', 'sim3',
+  'a14', 'a15', 'sim5',
   'a16', 'a17', 'a18',
 ]
 
@@ -68,8 +68,8 @@ export const BLOCK_STRUCTURE = [
   { id: 2, label: 'Understanding Search', activities: ['a4', 'a5'] as ActivityKey[], color: 'teal' },
   { id: 3, label: 'Technical SEO', activities: ['a6', 'a7', 'sim2'] as ActivityKey[], color: 'purple' },
   { id: 4, label: 'Content Optimisation', activities: ['a9', 'a8', 'a10', 'a10b'] as ActivityKey[], color: 'blue' },
-  { id: 5, label: 'Google Ads', activities: ['a11', 'a12', 'a12b', 'a13', 'sim3'] as ActivityKey[], color: 'amber' },
-  { id: 6, label: 'Measurement', activities: ['a14', 'a15', 'sim4', 'sim5'] as ActivityKey[], color: 'teal' },
+  { id: 5, label: 'Google Ads', activities: ['a11', 'a12', 'a12b', 'sim4', 'a13', 'sim3'] as ActivityKey[], color: 'amber' },
+  { id: 6, label: 'Measurement', activities: ['a14', 'a15', 'sim5'] as ActivityKey[], color: 'teal' },
   { id: 7, label: 'AI & Strategy', activities: ['a16', 'a17', 'a18'] as ActivityKey[], color: 'purple' },
 ]
 
