@@ -27,7 +27,7 @@ export function Sidebar({ currentPanel, onNavigate }: SidebarProps) {
   const isActivityDone = (key: string) => !!scores[key as keyof typeof scores]?.completed
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 z-50 overflow-y-auto">
+    <aside className="w-64 h-screen bg-slate-900 flex flex-col fixed top-0 left-0 z-50 overflow-y-auto">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8">
         <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">BM7621</div>

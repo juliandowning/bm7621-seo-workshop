@@ -1,26 +1,24 @@
 import type { Brand, ActivityKey } from '../types'
 
 // ─── ACCESS CODES ────────────────────────────────────────────
-// These must be seeded in Supabase. Listed here for reference.
 export const WORKSHOP_CODES = {
   ALPHA24: { brand: 'ASOS' as Brand, name: 'Alpha Team' },
   BRAVO24: { brand: 'Ryanair' as Brand, name: 'Bravo Team' },
   CHARLIE24: { brand: 'Starbucks' as Brand, name: 'Charlie Team' },
   DELTA24: { brand: 'Coca-Cola' as Brand, name: 'Delta Team' },
   ECHO24: { brand: 'Samsung' as Brand, name: 'Echo Team' },
-  // Facilitator
   FACILITATOR24: { brand: 'ASOS' as Brand, name: 'Facilitator' },
 }
 
 export const BRANDS: Brand[] = ['ASOS', 'Ryanair', 'Starbucks', 'Coca-Cola', 'Samsung']
 
-// ─── ACTIVITY ORDERING ───────────────────────────────────────
+// ─── ACTIVITY ORDERING (E-E-A-T now before Topic Cluster) ────
 export const ACTIVITY_ORDER: ActivityKey[] = [
   'a1', 'a2', 'a3', 'sim1',
   'a4', 'a5',
   'a6', 'a7', 'sim2',
-  'a8', 'a9', 'a10',
-  'a11', 'a12', 'a13', 'sim3',
+  'a9', 'a8', 'a10', 'a10b',
+  'a11', 'a12', 'a12b', 'a13', 'sim3',
   'a14', 'a15', 'sim4', 'sim5',
   'a16', 'a17', 'a18',
 ]
@@ -35,11 +33,13 @@ export const ACTIVITY_LABELS: Record<ActivityKey, string> = {
   a6: 'Technical Friction Hunt',
   a7: 'Technical Prioritisation Matrix',
   sim2: 'Conversion Lab',
-  a8: 'Topic Cluster Builder',
   a9: 'E-E-A-T Audit',
+  a8: 'Topic Cluster Builder',
   a10: 'Local SEO Challenge',
+  a10b: 'Content Makeover Challenge',
   a11: 'Will The Ads Serve?',
   a12: 'Negative Keyword Challenge',
+  a12b: 'Writing a Search Ad',
   a13: 'Budget Allocation Challenge',
   sim3: 'ROAS Lab',
   a14: 'Campaign Diagnosis',
@@ -69,12 +69,12 @@ export const BLOCK_STRUCTURE = [
   },
   {
     id: 4, label: 'Content Optimisation',
-    activities: ['a8', 'a9', 'a10'] as ActivityKey[],
+    activities: ['a9', 'a8', 'a10', 'a10b'] as ActivityKey[],
     color: 'blue',
   },
   {
     id: 5, label: 'Google Ads',
-    activities: ['a11', 'a12', 'a13', 'sim3'] as ActivityKey[],
+    activities: ['a11', 'a12', 'a12b', 'a13', 'sim3'] as ActivityKey[],
     color: 'amber',
   },
   {
@@ -124,7 +124,7 @@ export const INTENT_KEYS: Record<Brand, Array<{ kw: string; intent: string }>> =
 }
 
 // ─── ANSWER KEYS ─────────────────────────────────────────────
-export const CTR_ANSWERS = { p1: 3500, p8: 300, p2: 50 }
+export const CTR_ANSWERS = { p1: 3500, p8: 300, p2: 50, p3: 1650 }
 
 export const A11_ANSWERS = { a: 'Unlikely', b: 'Serve', c: 'Serve' }
 
@@ -152,6 +152,16 @@ export const SEARCH_CONSOLE_DATA = [
   { kw: 'long tail keyword', impressions: 4200, clicks: 840, ctr: 20, position: 2.3 },
 ]
 
+// ─── QUALITY KEYWORD BANKS ───────────────────────────────────
+export const QUALITY_KEYWORDS: Record<string, string[]> = {
+  content_makeover: ['expertise', 'authority', 'trust', 'readability', 'heading', 'structure', 'relevance', 'e-e-a-t', 'evidence', 'credib'],
+  search_ad: ['keyword', 'benefit', 'cta', 'click', 'offer', 'unique', 'relevance', 'headline', 'description', 'conversion'],
+  budget: ['roi', 'conversion', 'retarget', 'brand', 'intent', 'return', 'cost', 'efficient', 'allocat', 'performance'],
+  campaign_diagnosis: ['conversion rate', 'traffic quality', 'attribution', 'intent', 'landing page', 'bounce', 'session', 'funnel', 'tracking'],
+  ai_visibility: ['authority', 'citation', 'original', 'expertise', 'structured', 'schema', 'research', 'evidence', 'trust'],
+  cmo_strategy: ['seo', 'technical', 'ppc', 'ai', 'revenue', 'conversion', 'growth', 'return', 'commercial', 'roi', 'impact'],
+}
+
 // ─── SIMULATOR CONVERSION ────────────────────────────────────
 export function simAvgToPoints(avg: number): number {
   if (avg >= 90) return 5
@@ -167,4 +177,23 @@ export const SIMULATOR_LABELS: Record<string, string> = {
   sim3: 'ROAS Lab',
   sim4: 'Analytics Lab 1',
   sim5: 'Analytics Lab 2',
+}
+
+// ─── QUALITY SCORING ─────────────────────────────────────────
+export function calcQualityPts(text: string, bank: string[]): number {
+  if (!text || text.length < 20) return 0
+  const lower = text.toLowerCase()
+  const hits = bank.filter(k => lower.includes(k)).length
+  if (hits >= 4) return 3
+  if (hits >= 2) return 2
+  if (hits >= 1) return 1
+  return 0
+}
+
+export function calcCompletionPts(fields: string[], minLen = 20): number {
+  const filled = fields.filter(f => f && f.trim().length >= minLen).length
+  const ratio = filled / fields.length
+  if (ratio >= 1) return 2
+  if (ratio >= 0.5) return 1
+  return 0
 }

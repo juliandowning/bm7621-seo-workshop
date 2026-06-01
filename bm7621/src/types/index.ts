@@ -23,8 +23,8 @@ export type ActivityKey =
   | 'a4' | 'a5'
   | 'a6' | 'a7'
   | 'sim2'
-  | 'a8' | 'a9' | 'a10'
-  | 'a11' | 'a12' | 'a13'
+  | 'a9' | 'a8' | 'a10' | 'a10b'
+  | 'a11' | 'a12' | 'a12b' | 'a13'
   | 'sim3'
   | 'a14' | 'a15'
   | 'sim4' | 'sim5'
@@ -33,8 +33,11 @@ export type ActivityKey =
 export interface ActivityScore {
   key: ActivityKey
   points: number
+  completionPts: number
+  qualityPts: number
   max: number
   completed: boolean
+  locked: boolean
   timestamp?: string
 }
 
@@ -46,16 +49,27 @@ export interface ResponseMap {
   a2_intents?: string[]
   a3_serp?: string[]; a3_obs?: string
   a4_title?: string; a4_meta?: string; a4_kw?: string
-  a5_p1?: string; a5_p8?: string; a5_p2?: string
+  a5_p1?: string; a5_p8?: string; a5_p2?: string; a5_p3?: string
   a6_cwv?: string; a6_explain?: string
   a7_now?: string[]; a7_next?: string[]; a7_monitor?: string[]
-  a8_pillar?: string; a8_s1?: string; a8_s2?: string; a8_s3?: string
-  a8_q1?: string; a8_q2?: string; a8_q3?: string
+  // Block 4 — E-E-A-T now before Topic Cluster
   a9_exp?: number; a9_exp2?: number; a9_auth?: number; a9_trust?: number
   a9_exp_note?: string; a9_exp2_note?: string; a9_auth_note?: string; a9_trust_note?: string
+  a8_pillar?: string; a8_s1?: string; a8_s2?: string; a8_s3?: string
+  a8_q1?: string; a8_q2?: string; a8_q3?: string
   a10_gbp?: string; a10_reviews?: string; a10_citations?: string; a10_nap?: string
+  // A10b Content Makeover
+  a10b_heading?: string; a10b_intro?: string
+  a10b_imp1?: string; a10b_imp2?: string; a10b_imp3?: string
+  a10b_why?: string
+  // A11
   a11_a?: string; a11_b?: string; a11_c?: string
+  // A12
   a12_negkw?: string[]
+  // A12b Search Ad
+  a12b_h1?: string; a12b_h2?: string; a12b_h3?: string
+  a12b_d1?: string; a12b_d2?: string; a12b_cta?: string
+  // A13
   a13_brand?: number; a13_generic?: number; a13_comp?: number; a13_retarg?: number
   a13_rationale?: string
   a14_e1?: string; a14_e2?: string; a14_e3?: string; a14_next?: string
@@ -64,6 +78,8 @@ export interface ResponseMap {
   a17_ai?: string[]; a17_human?: string[]
   a18_seo?: string; a18_tech?: string; a18_ppc?: string; a18_ai?: string
   a18_r1?: string; a18_r2?: string; a18_r3?: string; a18_impact?: string
+  // Lock flags
+  locked_a2?: boolean; locked_a5?: boolean; locked_a7?: boolean
 }
 
 // ─── SIMULATOR ──────────────────────────────────────────────

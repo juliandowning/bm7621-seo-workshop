@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { SEARCH_CONSOLE_DATA } from '../../data/workshop'
-import { ActivityCard, Alert, SimInputs } from '../ui/shared'
+import { SEARCH_CONSOLE_DATA, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts } from '../../data/workshop'
+import { ActivityCard, Alert, SimInputs, CharCount, ScoreBreakdown } from '../ui/shared'
 
 export function Block6Panel() {
   const { team, scores, responses, simulators, updateScore, updateResponse, updateSimulator } = useWorkspaceStore()
@@ -9,16 +9,16 @@ export function Block6Panel() {
 
   // A14
   const [a14, setA14] = useState({
-    e1: responses.a14_e1 || '',
-    e2: responses.a14_e2 || '',
-    e3: responses.a14_e3 || '',
-    next: responses.a14_next || '',
+    e1: responses.a14_e1 || '', e2: responses.a14_e2 || '',
+    e3: responses.a14_e3 || '', next: responses.a14_next || '',
   })
 
   const scoreA14 = (updated: typeof a14) => {
-    const fields = Object.values(updated)
-    const filled = fields.filter(v => v.trim().length > 20).length
-    updateScore('a14', Math.min(5, filled + (filled >= 3 ? 1 : 0)))
+    const fields = [updated.e1, updated.e2, updated.e3, updated.next]
+    const cPts = calcCompletionPts(fields, 30)
+    const allText = fields.join(' ')
+    const qPts = calcQualityPts(allText, QUALITY_KEYWORDS.campaign_diagnosis)
+    updateScore('a14', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a14_e1: updated.e1, a14_e2: updated.e2, a14_e3: updated.e3, a14_next: updated.next })
   }
 
@@ -28,10 +28,8 @@ export function Block6Panel() {
 
   // A15
   const [a15, setA15] = useState({
-    high: responses.a15_high || '',
-    low: responses.a15_low || '',
-    opp: responses.a15_opp || '',
-    action: responses.a15_action || '',
+    high: responses.a15_high || '', low: responses.a15_low || '',
+    opp: responses.a15_opp || '', action: responses.a15_action || '',
   })
   const [a15Result, setA15Result] = useState<string | null>(null)
 
@@ -42,10 +40,10 @@ export function Block6Panel() {
     if (l.includes('category')) pts++
     if (o.includes('category') || o.includes('informational')) pts++
     if (a15.action.length > 40) pts++
-    if (a15.action.length > 80) pts++
+    if (a15.action.length > 100) pts++
     updateScore('a15', Math.min(5, pts))
     updateResponse({ a15_high: a15.high, a15_low: a15.low, a15_opp: a15.opp, a15_action: a15.action })
-    setA15Result(`Highest Impressions: "category keyword" (85,000) · Lowest CTR: "category keyword" (1%) · Biggest Opportunity: "category keyword" — position 8.4 with huge impression volume and 1% CTR. Moving from position 8 → 3 could 5× clicks. → ${pts} points`)
+    setA15Result(`Highest Impressions: "category keyword" (85,000) · Lowest CTR: "category keyword" (1%) · Biggest Opportunity: position 8.4 with 85k impressions — moving to position 3 could 5× clicks. → ${pts} points`)
   }
 
   // SIM 4 & 5
@@ -58,8 +56,7 @@ export function Block6Panel() {
         const valid = vals.filter((v): v is number => v !== null)
         if (valid.length > 0) {
           const avg = valid.reduce((a, b) => a + b, 0) / valid.length
-          const pts = avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1
-          updateScore(key as 'sim4' | 'sim5', pts)
+          updateScore(key as 'sim4' | 'sim5', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
         }
       }
     }
@@ -86,10 +83,15 @@ export function Block6Panel() {
           <div key={field.key} className="mb-3">
             <label className="form-label">{field.label}</label>
             <input className="form-input" placeholder={field.placeholder} value={a14[field.key]} onChange={e => updateA14(field.key, e.target.value)} />
+            <CharCount value={a14[field.key]} min={30} max={250} />
           </div>
         ))}
         <label className="form-label">Recommended Next Step</label>
-        <textarea className="form-textarea" rows={3} placeholder="What would you investigate first? What data would you pull?" value={a14.next} onChange={e => updateA14('next', e.target.value)} />
+        <textarea className="form-textarea" rows={3}
+          placeholder="What would you investigate first? What data would you pull? (min 50 chars)"
+          value={a14.next} onChange={e => updateA14('next', e.target.value)} />
+        <CharCount value={a14.next} min={50} max={500} />
+        {scores.a14 && <ScoreBreakdown completionPts={scores.a14.completionPts} qualityPts={scores.a14.qualityPts} />}
       </ActivityCard>
 
       {/* A15 */}
@@ -125,12 +127,15 @@ export function Block6Panel() {
           ].map(f => (
             <div key={f.key}>
               <label className="form-label">{f.label}</label>
-              <input className="form-input" placeholder={f.placeholder} value={a15[f.key]} onChange={e => { setA15({ ...a15, [f.key]: e.target.value }); updateResponse({ [`a15_${f.key}`]: e.target.value } as never) }} />
+              <input className="form-input" placeholder={f.placeholder} value={a15[f.key]}
+                onChange={e => { setA15({ ...a15, [f.key]: e.target.value }); updateResponse({ [`a15_${f.key}`]: e.target.value } as never) }} />
             </div>
           ))}
         </div>
         <label className="form-label">Recommended Action</label>
-        <textarea className="form-textarea" rows={3} placeholder="What specific optimisation would you recommend?" value={a15.action} onChange={e => { setA15({ ...a15, action: e.target.value }); updateResponse({ a15_action: e.target.value }) }} />
+        <textarea className="form-textarea" rows={3} placeholder="What specific optimisation would you recommend?" value={a15.action}
+          onChange={e => { setA15({ ...a15, action: e.target.value }); updateResponse({ a15_action: e.target.value }) }} />
+        <CharCount value={a15.action} min={50} max={250} />
         <button className="btn-success btn-sm mt-3" onClick={checkA15}>Check Answers</button>
         {a15Result && <div className="alert-info mt-3 text-sm">{a15Result}</div>}
       </ActivityCard>

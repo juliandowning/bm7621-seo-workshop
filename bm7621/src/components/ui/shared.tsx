@@ -150,3 +150,43 @@ export function SimInputs({ values, onChange, memberCount = 5 }: SimInputsProps)
     </div>
   )
 }
+
+// ─── CHAR COUNT ───────────────────────────────────────────────
+interface CharCountProps {
+  value: string
+  min: number
+  max: number
+}
+export function CharCount({ value, min, max }: CharCountProps) {
+  const len = value.length
+  const ok = len >= min && len <= max
+  const over = len > max
+  return (
+    <div className={`text-[10px] mt-1 font-mono ${ok ? 'text-emerald-600' : over ? 'text-red-500' : 'text-slate-400'}`}>
+      {len} / {max} chars &nbsp;·&nbsp; min {min}
+    </div>
+  )
+}
+
+// ─── LOCKED BADGE ────────────────────────────────────────────
+export function LockedBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+      🔒 Submitted
+    </span>
+  )
+}
+
+// ─── SCORE BREAKDOWN ─────────────────────────────────────────
+interface ScoreBreakdownProps {
+  completionPts: number
+  qualityPts: number
+}
+export function ScoreBreakdown({ completionPts, qualityPts }: ScoreBreakdownProps) {
+  return (
+    <div className="flex gap-3 text-[10px] font-mono text-slate-400 mt-1">
+      <span>Completion: <strong className="text-slate-600">{completionPts}/2</strong></span>
+      <span>Quality: <strong className="text-slate-600">{qualityPts}/3</strong></span>
+    </div>
+  )
+}

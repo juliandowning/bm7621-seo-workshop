@@ -1,26 +1,14 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { A17_AI_CORRECT, A17_HUMAN_CORRECT, A17_ALL_ITEMS } from '../../data/workshop'
+import { A17_AI_CORRECT, A17_HUMAN_CORRECT, A17_ALL_ITEMS, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts } from '../../data/workshop'
 import { runCMOEvaluation, verdictToPoints } from '../../lib/cmoEngine'
-import { ActivityCard, Alert, EvalBar } from '../ui/shared'
+import { ActivityCard, Alert, EvalBar, CharCount, ScoreBreakdown } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
 const VERDICT_CONFIG = {
-  approved: {
-    icon: '✅', label: 'Board Approved', color: 'border-emerald-400 bg-emerald-50',
-    titleColor: 'text-emerald-700',
-    message: 'Strong strategic thinking with commercial depth. Your recommendations demonstrate comprehensive understanding of the search landscape.',
-  },
-  revisions: {
-    icon: '🔄', label: 'Approved With Revisions', color: 'border-amber-400 bg-amber-50',
-    titleColor: 'text-amber-700',
-    message: 'Solid foundation but some strategic gaps remain. Strengthen the commercial impact section and ensure all four pillars are addressed.',
-  },
-  rejected: {
-    icon: '❌', label: 'Strategy Rejected', color: 'border-red-400 bg-red-50',
-    titleColor: 'text-red-700',
-    message: 'The board requires more substantive analysis. Revisit each section and ensure recommendations are grounded in specific workshop evidence.',
-  },
+  approved: { icon: '✅', label: 'Board Approved', color: 'border-emerald-400 bg-emerald-50', titleColor: 'text-emerald-700', message: 'Strong strategic thinking with commercial depth.' },
+  revisions: { icon: '🔄', label: 'Approved With Revisions', color: 'border-amber-400 bg-amber-50', titleColor: 'text-amber-700', message: 'Solid foundation but some strategic gaps remain.' },
+  rejected: { icon: '❌', label: 'Strategy Rejected', color: 'border-red-400 bg-red-50', titleColor: 'text-red-700', message: 'The board requires more substantive analysis.' },
 }
 
 export function Block7Panel() {
@@ -29,15 +17,15 @@ export function Block7Panel() {
 
   // A16
   const [a16, setA16] = useState({
-    auth: responses.a16_auth || '',
-    cite: responses.a16_cite || '',
-    orig: responses.a16_orig || '',
-    struct: responses.a16_struct || '',
+    auth: responses.a16_auth || '', cite: responses.a16_cite || '',
+    orig: responses.a16_orig || '', struct: responses.a16_struct || '',
   })
 
   const scoreA16 = (updated: typeof a16) => {
-    const filled = Object.values(updated).filter(v => v.trim().length > 20).length
-    updateScore('a16', Math.min(5, filled + (filled >= 3 ? 1 : 0)))
+    const fields = Object.values(updated)
+    const cPts = calcCompletionPts(fields, 50)
+    const qPts = calcQualityPts(fields.join(' '), QUALITY_KEYWORDS.ai_visibility)
+    updateScore('a16', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a16_auth: updated.auth, a16_cite: updated.cite, a16_orig: updated.orig, a16_struct: updated.struct })
   }
 
@@ -61,21 +49,17 @@ export function Block7Panel() {
 
   // A18
   const [a18, setA18] = useState({
-    seo: responses.a18_seo || '',
-    tech: responses.a18_tech || '',
-    ppc: responses.a18_ppc || '',
-    ai: responses.a18_ai || '',
-    r1: responses.a18_r1 || '',
-    r2: responses.a18_r2 || '',
-    r3: responses.a18_r3 || '',
+    seo: responses.a18_seo || '', tech: responses.a18_tech || '',
+    ppc: responses.a18_ppc || '', ai: responses.a18_ai || '',
+    r1: responses.a18_r1 || '', r2: responses.a18_r2 || '', r3: responses.a18_r3 || '',
     impact: responses.a18_impact || '',
   })
 
   const scoreA18 = (updated: typeof a18) => {
     const fields = Object.values(updated)
-    const filled = fields.filter(v => v.trim().length > 20).length
-    const pts = Math.min(5, Math.round(filled * 5 / fields.length) + (filled >= 7 ? 1 : 0))
-    updateScore('a18', Math.min(5, pts))
+    const cPts = calcCompletionPts(fields, 50)
+    const qPts = calcQualityPts(fields.join(' '), QUALITY_KEYWORDS.cmo_strategy)
+    updateScore('a18', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({
       a18_seo: updated.seo, a18_tech: updated.tech, a18_ppc: updated.ppc, a18_ai: updated.ai,
       a18_r1: updated.r1, a18_r2: updated.r2, a18_r3: updated.r3, a18_impact: updated.impact,
@@ -90,18 +74,18 @@ export function Block7Panel() {
     const eval_ = runCMOEvaluation(responses)
     setCMOEval(eval_)
     const pts = verdictToPoints(eval_.verdict)
-    updateScore('a18', Math.max(scores.a18?.points || 0, pts))
+    updateScore('a18', Math.max(scores.a18?.points || 0, pts), 5, scores.a18?.completionPts || 0, scores.a18?.qualityPts || 0)
   }
 
   return (
     <div>
       {/* A16 */}
       <ActivityCard number={16} title="AI Visibility Audit" subtitle="Assess your brand's AI search signals" points={scores.a16?.points || 0}>
-        <Alert type="info">🤖 As AI Overviews reshape search, brands need new credibility signals. Audit <strong>{brand}</strong> across the four AI visibility dimensions.</Alert>
+        <Alert type="info">🤖 Audit <strong>{brand}</strong> across the four AI visibility dimensions (min 50 chars each).</Alert>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { key: 'auth' as const, label: 'Authority Signals', placeholder: 'Wikipedia entries, news mentions, industry citations?' },
-            { key: 'cite' as const, label: 'Citation Opportunities', placeholder: 'Publications, directories, authoritative sources that link to you?' },
+            { key: 'cite' as const, label: 'Citation Opportunities', placeholder: 'Publications, directories, authoritative sources?' },
             { key: 'orig' as const, label: 'Original Research & Data', placeholder: 'Proprietary research, reports, original insights?' },
             { key: 'struct' as const, label: 'Structured Content', placeholder: 'Schema markup, FAQs, clear Q&A format content?' },
           ].map(field => (
@@ -109,9 +93,11 @@ export function Block7Panel() {
               <label className="form-label">{field.label}</label>
               <textarea className="form-textarea" rows={3} placeholder={field.placeholder} value={a16[field.key]}
                 onChange={e => { const next = { ...a16, [field.key]: e.target.value }; setA16(next); scoreA16(next) }} />
+              <CharCount value={a16[field.key]} min={50} max={250} />
             </div>
           ))}
         </div>
+        {scores.a16 && <ScoreBreakdown completionPts={scores.a16.completionPts} qualityPts={scores.a16.qualityPts} />}
       </ActivityCard>
 
       {/* A17 */}
@@ -126,16 +112,11 @@ export function Block7Panel() {
               <div className={`text-xs font-bold uppercase tracking-wider mb-3 ${col.title}`}>{col.label}</div>
               {A17_ALL_ITEMS.map(item => (
                 <label key={item} className="flex items-center gap-2 py-1.5 text-sm text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={col.state.includes(item)}
+                  <input type="checkbox" checked={col.state.includes(item)} className="accent-brand-500"
                     onChange={e => {
                       const next = e.target.checked ? [...col.state, item] : col.state.filter(x => x !== item)
-                      col.setState(next)
-                      updateResponse({ [`a17_${col.col}`]: next } as never)
-                    }}
-                    className="accent-brand-500"
-                  />
+                      col.setState(next); updateResponse({ [`a17_${col.col}`]: next } as never)
+                    }} />
                   {item}
                 </label>
               ))}
@@ -150,7 +131,7 @@ export function Block7Panel() {
       <ActivityCard number={18} title="CMO Strategy Challenge" subtitle="Deliver your final board-ready recommendation" points={scores.a18?.points || 0}>
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
           <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1">Board Presentation</div>
-          <div className="text-sm text-slate-700">You have 5 minutes with the CMO. Your strategy must be clear, commercial, and evidenced by today's workshop.</div>
+          <div className="text-sm text-slate-700">You have 5 minutes with the CMO. Your strategy must be clear, commercial, and evidenced by today's workshop. Min 100 chars per section.</div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {[
@@ -162,27 +143,34 @@ export function Block7Panel() {
             <div key={field.key}>
               <label className="form-label">{field.label}</label>
               <textarea className="form-textarea" rows={3} placeholder={field.placeholder} value={a18[field.key]} onChange={e => updateA18(field.key, e.target.value)} />
+              <CharCount value={a18[field.key]} min={100} max={500} />
             </div>
           ))}
         </div>
         <div className="mb-4">
-          <label className="form-label">Top 3 Recommendations (in priority order)</label>
+          <label className="form-label">Top 3 Recommendations</label>
           {[
             { key: 'r1' as const, placeholder: 'Recommendation 1 — Most impactful, immediate action' },
             { key: 'r2' as const, placeholder: 'Recommendation 2' },
             { key: 'r3' as const, placeholder: 'Recommendation 3' },
           ].map(f => (
-            <input key={f.key} className="form-input mb-2" placeholder={f.placeholder} value={a18[f.key]} onChange={e => updateA18(f.key, e.target.value)} />
+            <div key={f.key} className="mb-2">
+              <input className="form-input" placeholder={f.placeholder} value={a18[f.key]} onChange={e => updateA18(f.key, e.target.value)} />
+              <CharCount value={a18[f.key]} min={50} max={250} />
+            </div>
           ))}
         </div>
         <div className="mb-5">
           <label className="form-label">Expected Business Impact</label>
-          <textarea className="form-textarea" rows={3} placeholder="What commercial outcomes do you predict? Be specific about metrics and timeframes." value={a18.impact} onChange={e => updateA18('impact', e.target.value)} />
+          <textarea className="form-textarea" rows={3}
+            placeholder="Quantify commercial outcomes. Be specific about metrics and timeframes. (min 100 chars)"
+            value={a18.impact} onChange={e => updateA18('impact', e.target.value)} />
+          <CharCount value={a18.impact} min={100} max={500} />
         </div>
-        <button className="btn-primary" onClick={handleSubmitBoard}>🏛️ Submit to Board</button>
+        {scores.a18 && <ScoreBreakdown completionPts={scores.a18.completionPts} qualityPts={scores.a18.qualityPts} />}
+        <button className="btn-primary mt-3" onClick={handleSubmitBoard}>🏛️ Submit to Board</button>
       </ActivityCard>
 
-      {/* CMO Eval result */}
       {cmoEval && (
         <div className="card-p mt-0">
           <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Board Evaluation Report</div>
@@ -192,12 +180,8 @@ export function Block7Panel() {
             <div className={cn('font-display text-xl font-semibold mb-2', VERDICT_CONFIG[cmoEval.verdict].titleColor)}>{VERDICT_CONFIG[cmoEval.verdict].label}</div>
             <div className="text-sm text-slate-600">{VERDICT_CONFIG[cmoEval.verdict].message}</div>
           </div>
-          {cmoEval.strengths.length > 0 && (
-            <div className="alert-success mt-4"><strong>Strengths:</strong> {cmoEval.strengths.join(', ')}</div>
-          )}
-          {cmoEval.weaknesses.length > 0 && (
-            <div className="alert-warning mt-2 text-sm">{cmoEval.weaknesses.join(' · ')}</div>
-          )}
+          {cmoEval.strengths.length > 0 && <div className="alert-success mt-4"><strong>Strengths:</strong> {cmoEval.strengths.join(', ')}</div>}
+          {cmoEval.weaknesses.length > 0 && <div className="alert-warning mt-2 text-sm">{cmoEval.weaknesses.join(' · ')}</div>}
         </div>
       )}
     </div>

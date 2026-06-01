@@ -123,7 +123,7 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
 
               <div className="mb-4">
                 <label className="form-label">Team Name</label>
-                <input className="form-input" placeholder="e.g. Alpha Search Consultancy" value={name} onChange={e => setName(e.target.value)} />
+                <input className="form-input" placeholder="Enter your team PIN" value={name} onChange={e => setName(e.target.value)} />
               </div>
 
               <div className="mb-5">

@@ -4,9 +4,10 @@ import type { WorkspaceState, Team, ScoreMap, ResponseMap, SimulatorMap, CMOEval
 import { upsertWorkspaceData, isSupabaseConfigured } from '../lib/supabase'
 
 interface WorkspaceStore extends WorkspaceState {
-  // Actions
   setTeam: (team: Team) => void
-  updateScore: (key: ActivityKey, points: number, max?: number) => void
+  updateScore: (key: ActivityKey, points: number, max?: number, completionPts?: number, qualityPts?: number) => void
+  lockActivity: (key: ActivityKey) => void
+  unlockActivity: (key: ActivityKey) => void
   updateResponse: (patch: Partial<ResponseMap>) => void
   updateSimulator: (key: string, scores: (number | null)[]) => void
   setCMOEval: (eval_: CMOEvaluation) => void
@@ -35,19 +36,46 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       setTeam: (team) => set({ team }),
 
-      updateScore: (key, points, max = 5) => {
+      updateScore: (key, points, max = 5, completionPts = 0, qualityPts = 0) => {
         set(state => ({
           scores: {
             ...state.scores,
             [key]: {
               key,
               points,
+              completionPts,
+              qualityPts,
               max,
               completed: points > 0,
+              locked: state.scores[key]?.locked || false,
               timestamp: new Date().toISOString(),
             },
           },
           syncStatus: 'idle',
+        }))
+        scheduledSync(get)
+      },
+
+      lockActivity: (key) => {
+        set(state => ({
+          scores: {
+            ...state.scores,
+            [key]: state.scores[key]
+              ? { ...state.scores[key]!, locked: true }
+              : { key, points: 0, completionPts: 0, qualityPts: 0, max: 5, completed: false, locked: true },
+          },
+        }))
+        scheduledSync(get)
+      },
+
+      unlockActivity: (key) => {
+        set(state => ({
+          scores: {
+            ...state.scores,
+            [key]: state.scores[key]
+              ? { ...state.scores[key]!, locked: false }
+              : { key, points: 0, completionPts: 0, qualityPts: 0, max: 5, completed: false, locked: false },
+          },
         }))
         scheduledSync(get)
       },
@@ -138,12 +166,9 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
   )
 )
 
-// Debounced sync — waits 2.5s after last change
 function scheduledSync(get: () => WorkspaceStore) {
   if (syncTimeout) clearTimeout(syncTimeout)
-  syncTimeout = setTimeout(() => {
-    get().syncToSupabase()
-  }, 2500)
+  syncTimeout = setTimeout(() => { get().syncToSupabase() }, 2500)
 }
 
 function simPts(avg: number) {
@@ -154,11 +179,16 @@ function simPts(avg: number) {
   return 1
 }
 
-// ─── SELECTORS ───────────────────────────────────────────────
 export function selectTotalScore(scores: ScoreMap): number {
   return Object.values(scores).reduce((sum, s) => sum + (s?.points || 0), 0)
 }
 
 export function selectCompletedCount(scores: ScoreMap): number {
   return Object.values(scores).filter(s => s?.completed).length
+}
+
+export function selectAvgQuality(scores: ScoreMap): number {
+  const withQuality = Object.values(scores).filter(s => s?.completed && s.qualityPts > 0)
+  if (!withQuality.length) return 0
+  return Math.round(withQuality.reduce((sum, s) => sum + (s?.qualityPts || 0), 0) / withQuality.length * 10) / 10
 }
