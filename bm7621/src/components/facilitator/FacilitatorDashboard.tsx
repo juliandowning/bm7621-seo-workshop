@@ -14,8 +14,8 @@ interface TeamRow {
   lastUpdated: string | null
 }
 
-function computeRow(raw: { brand: Brand; name: string; workspace_data?: { scores?: Record<string, { points: number; completed: boolean }>; simulators?: Record<string, { points: number }>; updated_at?: string }[] }): TeamRow {
-  const ws = raw.workspace_data?.[0]
+function computeRow(raw: { brand: Brand; name: string; bm7621seo_workspace_data?: { scores?: Record<string, { points: number; completed: boolean }>; simulators?: Record<string, { points: number }>; updated_at?: string }[] }): TeamRow {
+  const ws = raw.bm7621seo_workspace_data?.[0]
   const sc = ws?.scores || {}
   const sim = ws?.simulators || {}
   const score = Object.values(sc).reduce((s: number, v) => s + (v?.points || 0), 0)
