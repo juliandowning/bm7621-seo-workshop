@@ -47,14 +47,14 @@ export function exportWorkbookText(data: ExportData) {
   })
 
   lines.push('', '─── CMO STRATEGY ──────────────────────────────────────────')
-  lines.push(`SEO Opportunity: ${responses.a18_seo || '—'}`)
-  lines.push(`Technical Risk: ${responses.a18_tech || '—'}`)
-  lines.push(`PPC Opportunity: ${responses.a18_ppc || '—'}`)
-  lines.push(`AI Opportunity: ${responses.a18_ai || '—'}`)
-  lines.push(`Recommendation 1: ${responses.a18_r1 || '—'}`)
-  lines.push(`Recommendation 2: ${responses.a18_r2 || '—'}`)
-  lines.push(`Recommendation 3: ${responses.a18_r3 || '—'}`)
-  lines.push(`Business Impact: ${responses.a18_impact || '—'}`)
+  lines.push(`SEO Opportunity: ${responses.a18_seo_pick || '—'}`)
+  lines.push(`Technical Risk: ${responses.a18_ai_pick || '—'}`)
+  lines.push(`PPC Opportunity: ${responses.a18_ppc_pick || '—'}`)
+  lines.push(`AI Opportunity: ${responses.a18_ai_pick || '—'}`)
+  lines.push(`Recommendation 1: ${responses.a18_rationale || '—'}`)
+  lines.push(`Recommendation 2: ${responses.a18_goal_pick || '—'}`)
+  lines.push(`Recommendation 3: ${responses.a18_rationale || '—'}`)
+  lines.push(`Business Impact: ${responses.a18_rationale || '—'}`)
 
   if (cmoEval) {
     lines.push('', '─── BOARD EVALUATION ──────────────────────────────────────')
@@ -120,26 +120,26 @@ export function exportStrategyHTML(data: ExportData) {
 <p>Following a comprehensive 6-hour SEO workshop, this report presents our strategic recommendations for ${team.brand}'s search performance. Organic growth has stalled whilst paid search costs have increased. AI-powered search is reshaping how customers discover products. This strategy addresses immediate opportunities and long-term positioning across organic, technical, paid, and AI-driven search.</p>
 
 <h2>SEO Opportunity</h2>
-<p>${responses.a18_seo || '—'}</p>
+<p>${responses.a18_seo_pick || '—'}</p>
 
 <h2>Biggest Technical Risk</h2>
-<p>${responses.a18_tech || '—'}</p>
+<p>${responses.a18_ai_pick || '—'}</p>
 
 <h2>PPC Opportunity</h2>
-<p>${responses.a18_ppc || '—'}</p>
+<p>${responses.a18_ppc_pick || '—'}</p>
 
 <h2>AI Search Opportunity</h2>
-<p>${responses.a18_ai || '—'}</p>
+<p>${responses.a18_ai_pick || '—'}</p>
 
 <h2>Top 3 Strategic Recommendations</h2>
 <div class="recs">
-  <div class="rec">1. ${responses.a18_r1 || '—'}</div>
-  <div class="rec">2. ${responses.a18_r2 || '—'}</div>
-  <div class="rec">3. ${responses.a18_r3 || '—'}</div>
+  <div class="rec">1. ${responses.a18_rationale || '—'}</div>
+  <div class="rec">2. ${responses.a18_goal_pick || '—'}</div>
+  <div class="rec">3. ${responses.a18_rationale || '—'}</div>
 </div>
 
 <h2>Expected Business Impact</h2>
-<p>${responses.a18_impact || '—'}</p>
+<p>${responses.a18_rationale || '—'}</p>
 
 ${cmoEval ? `
 <h2>Board Evaluation</h2>
