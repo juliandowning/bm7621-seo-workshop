@@ -55,7 +55,7 @@ export async function getAllTeamsData() {
     .from('bm7621seo_teams')
     .select(`
       *,
-      workspace_data (
+      bm7621seo_workspace_data (
         scores,
         responses,
         simulators,
