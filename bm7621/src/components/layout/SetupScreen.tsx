@@ -42,14 +42,12 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
     try {
       let team: Team | null = null
 
-      if (isSupabaseConfigured()) {
+      // Always check demo teams first for speed and reliability
+      const demo = DEMO_TEAMS.find(t => t.code === trimmed)
+      if (demo) {
+        team = demo
+      } else if (isSupabaseConfigured()) {
         team = await getTeamByCode(trimmed) as Team | null
-      }
-
-      if (!team) {
-        // Fallback: match demo teams
-        const demo = DEMO_TEAMS.find(t => t.code === trimmed)
-        if (demo) team = demo
       }
 
       if (!team) {
