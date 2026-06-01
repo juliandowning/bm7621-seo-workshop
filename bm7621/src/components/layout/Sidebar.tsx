@@ -1,6 +1,6 @@
 import { BookOpen, BarChart3, CheckCircle, Circle, Wifi, WifiOff, AlertCircle } from 'lucide-react'
 import { useWorkspaceStore, selectTotalScore, selectCompletedCount } from '../../store/workspace'
-import { BLOCK_STRUCTURE, ACTIVITY_ORDER } from '../../data/workshop'
+import { BLOCK_STRUCTURE, ACTIVITY_ORDER, ACTIVITY_LABELS, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { cn } from '../../lib/utils'
 
 interface SidebarProps {
@@ -94,7 +94,11 @@ export function Sidebar({ currentPanel, onNavigate }: SidebarProps) {
                     ? <CheckCircle size={11} className="text-emerald-400 flex-shrink-0" />
                     : <Circle size={11} className="flex-shrink-0" />
                   }
-                  <span className="truncate">{actKey.toUpperCase().replace('SIM', 'Sim ')}</span>
+                  <span className="truncate">
+                    {actKey.startsWith('sim')
+                      ? `Sim — ${ACTIVITY_LABELS[actKey]}`
+                      : `A${ACTIVITY_DISPLAY_NUM[actKey]} — ${ACTIVITY_LABELS[actKey]}`}
+                  </span>
                 </button>
               )
             })}
