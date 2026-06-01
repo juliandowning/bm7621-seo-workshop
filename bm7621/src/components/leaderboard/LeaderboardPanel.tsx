@@ -52,7 +52,7 @@ export function LeaderboardPanel() {
       const updated = BRANDS.map(brand => {
         const row = data.find((r: { brand: string }) => r.brand === brand)
         if (!row) return { name: brand, brand, score: brand === team?.brand ? myScore : 0, completed: brand === team?.brand ? myCompleted : 0, isMine: brand === team?.brand }
-        const wsData = row.workspace_data?.[0]
+        const wsData = row.bm7621seo_workspace_data?.[0]
         const sc = wsData?.scores || {}
         const sim = wsData?.simulators || {}
         const rowScore = Object.values(sc).reduce((s: number, v: unknown) => s + ((v as { points?: number })?.points || 0), 0)
