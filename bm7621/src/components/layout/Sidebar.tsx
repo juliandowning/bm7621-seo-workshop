@@ -138,6 +138,21 @@ export function Sidebar({ currentPanel, onNavigate }: SidebarProps) {
           </span>
         </div>
       </div>
+
+      {/* Switch team */}
+      <div className="px-4 pb-4 border-t border-white/8 pt-3">
+        <button
+          onClick={() => {
+            if (window.confirm('Switch team? Your progress is saved and will reload when you enter your code again.')) {
+              useWorkspaceStore.getState().clearWorkspace()
+              window.location.reload()
+            }
+          }}
+          className="w-full text-left text-[11px] text-slate-600 hover:text-slate-400 transition-colors flex items-center gap-1.5 py-1"
+        >
+          <span>⇄</span> Switch Team / Sign Out
+        </button>
+      </div>
     </aside>
   )
 }
