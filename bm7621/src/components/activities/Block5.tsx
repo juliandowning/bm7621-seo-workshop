@@ -64,8 +64,8 @@ export function Block5Panel() {
 
   // A15 — Budget
   const [budget, setBudget] = useState({
-    brand: responses.a13_brand ?? 3000, generic: responses.a13_generic ?? 4000,
-    comp: responses.a13_comp ?? 1500, retarg: responses.a13_retarg ?? 1500,
+    brand: responses.a13_brand ?? 0, generic: responses.a13_generic ?? 0,
+    comp: responses.a13_comp ?? 0, retarg: responses.a13_retarg ?? 0,
   })
   const [rationale, setRationale] = useState(responses.a13_rationale || '')
   const a13Locked = !!responses.locked_a13
@@ -78,6 +78,17 @@ export function Block5Panel() {
     updateScore('a13', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a13_brand: budget.brand, a13_generic: budget.generic, a13_comp: budget.comp, a13_retarg: budget.retarg, a13_rationale: rationale, locked_a13: true })
     lockActivity('a13')
+  }
+
+  // SIM 4 (Analytics Lab 1 — appears before Budget in this block)
+  const [sim4Vals, setSim4Vals] = useState<(number | null)[]>(simulators['sim4']?.scores || [null, null, null, null, null])
+  const handleSim4 = (vals: (number | null)[]) => {
+    updateSimulator('sim4', vals)
+    const valid = vals.filter((v): v is number => v !== null)
+    if (valid.length > 0) {
+      const avg = valid.reduce((a, b) => a + b, 0) / valid.length
+      updateScore('sim4', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
+    }
   }
 
   // SIM 3
@@ -214,6 +225,15 @@ export function Block5Panel() {
           </div>
         )}
         {scores.a12b && <FeedbackPanel score={scores.a12b.points} max={5} why="Completion: all fields filled = 2pts. Quality: use of keyword, benefit, CTA vocabulary in combined ad text increases quality score (max 3pts)." example={`H1: "${brand} Official Store" | H2: "Free Next-Day Delivery" | H3: "Shop the Latest Collection" · D1: "Explore thousands of styles across clothing, shoes and accessories. Free returns on every order." · D2: "Join millions of ${brand} shoppers. Exclusive member offers and new drops every week." · CTA: Shop Now`} keyLearning={['Headlines are the most important element — lead with keyword and primary benefit.', 'Each headline appears in different combinations — make sure all three work independently.', 'Descriptions should expand on the headline benefit and address a potential objection.', 'A clear CTA in descriptions (not just extensions) improves CTR.']} />}
+      </ActivityCard>
+
+      {/* SIM 4 — Analytics Lab 1 (before Budget) */}
+      <ActivityCard number="SIM" title="Analytics Lab 1 — Simulator" subtitle="Enter individual student scores" points={scores.sim4?.points || 0} isSimulator>
+        <Alert type="info">📊 Enter each team member's Analytics Lab 1 score. Auto-converted to workshop points.</Alert>
+        <SimInputs values={sim4Vals} onChange={vals => { setSim4Vals(vals); handleSim4(vals) }} memberCount={team?.members.length || 5} />
+        {simulators['sim4']?.average !== null && simulators['sim4'] && (
+          <div className="alert-success mt-3">Average: <strong>{simulators['sim4'].average?.toFixed(1)}</strong> → <strong>{simulators['sim4'].points} workshop points</strong></div>
+        )}
       </ActivityCard>
 
       {/* A15 — Budget */}

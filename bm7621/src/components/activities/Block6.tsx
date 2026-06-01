@@ -59,14 +59,13 @@ export function Block6Panel() {
         const valid = vals.filter((v): v is number => v !== null)
         if (valid.length > 0) {
           const avg = valid.reduce((a, b) => a + b, 0) / valid.length
-          updateScore(key as 'sim4' | 'sim5', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
+          updateScore(key as 'sim5', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
         }
       }
     }
   }
 
-  const s4 = makeSim('sim4'); const s5 = makeSim('sim5')
-  const [sim4Vals, setSim4Vals] = useState<(number | null)[]>(s4.vals)
+  const s5 = makeSim('sim5')
   const [sim5Vals, setSim5Vals] = useState<(number | null)[]>(s5.vals)
 
   return (
@@ -172,15 +171,6 @@ export function Block6Panel() {
           />
         )}
       </ActivityCard>
-
-      {/* SIM 4 */}
-      <ActivityCard number="SIM" title="Analytics Lab 1 — Simulator" subtitle="Enter individual student scores" points={scores.sim4?.points || 0} isSimulator>
-        <SimInputs values={sim4Vals} onChange={vals => { setSim4Vals(vals); s4.handler(vals) }} memberCount={team?.members.length || 5} />
-        {simulators['sim4']?.average !== null && simulators['sim4'] && (
-          <div className="alert-success mt-3">Average: <strong>{simulators['sim4'].average?.toFixed(1)}</strong> → <strong>{simulators['sim4'].points} workshop points</strong></div>
-        )}
-      </ActivityCard>
-
       {/* SIM 5 */}
       <ActivityCard number="SIM" title="Analytics Lab 2 — Simulator" subtitle="Enter individual student scores" points={scores.sim5?.points || 0} isSimulator>
         <SimInputs values={sim5Vals} onChange={vals => { setSim5Vals(vals); s5.handler(vals) }} memberCount={team?.members.length || 5} />

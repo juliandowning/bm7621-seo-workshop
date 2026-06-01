@@ -6,10 +6,10 @@ import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakd
 const N = ACTIVITY_DISPLAY_NUM
 
 const EEAT_DIMS = [
-  { key: 'a9_exp' as const, noteKey: 'a9_exp_note' as const, label: 'Experience', hint: 'Evidence of first-hand experience with the product or service...' },
-  { key: 'a9_exp2' as const, noteKey: 'a9_exp2_note' as const, label: 'Expertise', hint: 'Subject matter knowledge, qualifications, depth of content...' },
-  { key: 'a9_auth' as const, noteKey: 'a9_auth_note' as const, label: 'Authority', hint: 'Backlinks, mentions, industry recognition, press coverage...' },
-  { key: 'a9_trust' as const, noteKey: 'a9_trust_note' as const, label: 'Trust', hint: 'Transparency, reviews, security signals, returns policy...' },
+  { key: 'a9_exp' as const, noteKey: 'a9_exp_note' as const, label: 'Experience', hint: 'Does the brand show real customer experience? How?' },
+  { key: 'a9_exp2' as const, noteKey: 'a9_exp2_note' as const, label: 'Expertise', hint: 'What makes this brand a credible subject matter expert?' },
+  { key: 'a9_auth' as const, noteKey: 'a9_auth_note' as const, label: 'Authority', hint: 'How does the wider web recognise this brand as authoritative?' },
+  { key: 'a9_trust' as const, noteKey: 'a9_trust_note' as const, label: 'Trust', hint: 'What signals make customers trust this brand online?' },
 ]
 
 function StarRating({ value, onChange, disabled }: { value: number; onChange: (v: number) => void; disabled?: boolean }) {

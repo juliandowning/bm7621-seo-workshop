@@ -72,7 +72,7 @@ export function Block2Panel() {
         <div className="mb-4">
           <label className="form-label">Title Tag</label>
           <input className="form-input" disabled={a4Locked}
-            placeholder={`e.g. ${brand} | Shop Now — Free Delivery on Orders Over £35`}
+            placeholder="Write a clear, keyword-rich title (30–60 chars)"
             value={title} onChange={e => { setTitle(e.target.value); if (!a4Locked) scoreA4(e.target.value, meta, kw) }} />
           <div className={`text-xs mt-1 ${charCountClass(title.length, 30, 60)}`}>{title.length} characters (target: 30–60)</div>
         </div>
