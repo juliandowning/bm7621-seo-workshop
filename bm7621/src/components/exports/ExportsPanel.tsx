@@ -2,21 +2,21 @@ import { useWorkspaceStore } from '../../store/workspace'
 import { exportWorkbookText, exportStrategyHTML, exportJSONBackup } from '../../lib/exports'
 
 export function ExportsPanel() {
-  const { team, scores, responses, simulators, cmoEval, exportJSON, importJSON } = useWorkspaceStore()
+  const { team, scores, responses, simulators, cmoEval, searchMasters, exportJSON, importJSON } = useWorkspaceStore()
 
   const handleExportWorkbook = () => {
     if (!team) return
-    exportWorkbookText({ team, scores, responses, simulators, cmoEval })
+    exportWorkbookText({ team, scores, responses, simulators, cmoEval, searchMasters })
   }
 
   const handleExportStrategy = () => {
     if (!team) return
-    exportStrategyHTML({ team, scores, responses, simulators, cmoEval })
+    exportStrategyHTML({ team, scores, responses, simulators, cmoEval, searchMasters })
   }
 
   const handleExportJSON = () => {
     if (!team) return
-    exportJSONBackup({ team, scores, responses, simulators, cmoEval })
+    exportJSONBackup({ team, scores, responses, simulators, cmoEval, searchMasters })
   }
 
   const handleExportRaw = () => {
