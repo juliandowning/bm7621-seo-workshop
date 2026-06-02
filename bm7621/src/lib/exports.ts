@@ -83,97 +83,114 @@ export function exportWorkbookText(data: ExportData) {
 
 // ─── STRATEGY REPORT HTML ────────────────────────────────────
 export function exportStrategyHTML(data: ExportData) {
-  const { team, scores, responses, cmoEval } = data
-  const total = totalScore(scores)
+  const { team, scores, responses, simulators } = data
+  const workshopTotal = totalScore(scores) + Object.values(simulators).reduce((s, v) => s + (v?.points || 0), 0)
+  const sm = data.searchMasters
+  const smAnswered = sm ? Object.keys(sm.answers).length : 0
+  const smCorrect = sm ? Object.values(sm.answers).filter(a => a.correct).length : 0
 
-  const verdictColors = {
-    approved: '#1d9a6c',
-    revisions: '#d4820a',
-    rejected: '#c0392b',
-  }
-  const verdictColor = cmoEval ? verdictColors[cmoEval.verdict] : '#2c6fad'
-  const verdictLabel = cmoEval
-    ? { approved: 'Board Approved', revisions: 'Approved With Revisions', rejected: 'Strategy Rejected' }[cmoEval.verdict]
-    : 'Pending Review'
+  // Build activity rows
+  const activityRows = [
+    { label: 'A1 Human Seed List', key: 'a1' },
+    { label: 'A2 Intent Mapping', key: 'a2' },
+    { label: 'A3 SERP Visibility', key: 'a3' },
+    { label: 'A4 On-Page Mini Ad', key: 'a4' },
+    { label: 'A5 CTR Reality Check', key: 'a5' },
+    { label: 'A6 Technical Friction Hunt', key: 'a6' },
+    { label: 'A7 Prioritisation Matrix', key: 'a7' },
+    { label: 'A8 E-E-A-T Audit', key: 'a9' },
+    { label: 'A9 Topic Cluster Builder', key: 'a8' },
+    { label: 'A10 Content Makeover', key: 'a10b' },
+    { label: 'A11 Will The Ads Serve?', key: 'a11' },
+    { label: 'A12 Negative Keywords', key: 'a12' },
+    { label: 'A13 Writing a Search Ad', key: 'a12b' },
+    { label: 'A14 Budget Allocation', key: 'a13' },
+    { label: 'A15 Search Console', key: 'a15' },
+    { label: 'A16 AI Visibility Audit', key: 'a16' },
+    { label: 'A17 AI vs Human', key: 'a17' },
+    { label: 'A18 Search Masters', key: 'a18' },
+    { label: 'Sim — Search Lab', key: 'sim1', isSim: true },
+    { label: 'Sim — Paid Media Lab', key: 'sim3', isSim: true },
+    { label: 'Sim — Analytics Lab 1', key: 'sim4', isSim: true },
+    { label: 'Sim — Analytics Lab 2', key: 'sim5', isSim: true },
+  ]
+
+  const actRows = activityRows.map(row => {
+    const s = (row.isSim ? simulators[row.key] : scores[row.key as keyof typeof scores]) as { points?: number; max?: number; completed?: boolean } | undefined
+    const pts = s?.points || 0
+    const max = row.isSim ? 5 : (s as {max?:number})?.max || 5
+    const done = (s as {completed?:boolean})?.completed || pts > 0
+    return '<tr><td style="padding:6px 12px;border-bottom:1px solid #f1f5f9;font-size:0.85rem;">' + row.label + '</td>' +
+      '<td style="padding:6px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-weight:bold;color:' + (done?'#2c6fad':'#94a3b8') + '">' + pts + '/' + max + '</td>' +
+      '<td style="padding:6px 12px;border-bottom:1px solid #f1f5f9;text-align:center;">' + (done?'✓':'—') + '</td></tr>'
+  }).join('')
+
+  // Search Masters question table
+  const smRows = sm && smAnswered > 0
+    ? Object.entries(sm.answers).map(([id, ans]) => {
+        const qNum = id.replace('r', 'R').replace('q', 'Q')
+        return '<tr><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:0.78rem;">' + qNum + '</td>' +
+          '<td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-size:0.82rem;">' + (ans.answer || '—') + '</td>' +
+          '<td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;color:' + (ans.correct?'#16a34a':'#dc2626') + '">' + (ans.correct?'✓':'✗') + '</td>' +
+          '<td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:center;">' + ans.points + '</td></tr>'
+      }).join('')
+    : '<tr><td colspan="4" style="padding:12px;color:#94a3b8;font-size:0.85rem;">Not attempted</td></tr>'
 
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Search Strategy Report — ${team.name}</title>
+<title>BM7621 Workshop Report — ${team.name}</title>
 <style>
-  body { font-family: Georgia, serif; max-width: 820px; margin: 48px auto; padding: 0 32px; color: #1a2233; }
-  h1 { font-size: 2.2rem; border-bottom: 3px solid #2c6fad; padding-bottom: 14px; margin-bottom: 8px; font-weight: normal; }
-  h2 { font-size: 0.78rem; color: #2c6fad; text-transform: uppercase; letter-spacing: 0.12em; margin: 28px 0 8px; }
+  body { font-family: Georgia, serif; max-width: 860px; margin: 48px auto; padding: 0 32px; color: #1a2233; }
+  h1 { font-size: 2rem; border-bottom: 3px solid #2c6fad; padding-bottom: 14px; margin-bottom: 8px; font-weight: normal; }
+  h2 { font-size: 0.75rem; color: #2c6fad; text-transform: uppercase; letter-spacing: 0.12em; margin: 32px 0 10px; }
   .meta { color: #8896a8; font-size: 0.88rem; margin-bottom: 32px; }
-  p { line-height: 1.75; margin-bottom: 12px; font-size: 0.95rem; }
-  .recs { background: #f0f5fb; border-left: 4px solid #2c6fad; padding: 16px 20px; border-radius: 6px; }
-  .rec { margin-bottom: 10px; font-size: 0.95rem; }
-  .verdict-box { border: 2px solid ${verdictColor}; border-radius: 8px; padding: 20px 24px; margin-top: 24px; text-align: center; }
-  .verdict-label { font-size: 1.3rem; color: ${verdictColor}; font-weight: bold; }
-  .dim-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #e2e6ed; font-size: 0.88rem; }
-  .dim-bar { height: 6px; background: #e2e6ed; border-radius: 3px; width: 160px; overflow: hidden; margin-left: 12px; }
-  .dim-fill { height: 100%; background: #2c6fad; border-radius: 3px; }
-  .score-box { display: inline-block; background: #1a2233; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; margin-top: 24px; }
-  @media print { .score-box { break-inside: avoid; } }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  th { text-align: left; padding: 8px 12px; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+  .score-strip { display: flex; gap: 24px; background: #f8faff; border: 1px solid #dde8f7; border-radius: 8px; padding: 20px 24px; margin-bottom: 8px; }
+  .score-item { text-align: center; }
+  .score-num { font-size: 2rem; font-weight: bold; color: #2c6fad; }
+  .score-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-top: 2px; }
+  .sm-summary { background: #f5f3ff; border-left: 4px solid #7c3aed; padding: 14px 18px; border-radius: 6px; margin-bottom: 12px; }
+  @media print { h2 { page-break-before: auto; } table { page-break-inside: avoid; } }
 </style>
 </head>
 <body>
-<h1>Search Strategy Report</h1>
-<div class="meta">${team.name} &nbsp;·&nbsp; ${team.brand} &nbsp;·&nbsp; BM7621 SEO Workshop &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
+<h1>BM7621 Workshop Report</h1>
+<div class="meta">${team.name} &nbsp;·&nbsp; ${team.brand} &nbsp;·&nbsp; Kingston Business School &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
 
-<h2>Executive Summary</h2>
-<p>Following a comprehensive 6-hour SEO workshop, this report presents our strategic recommendations for ${team.brand}'s search performance. Organic growth has stalled whilst paid search costs have increased. AI-powered search is reshaping how customers discover products. This strategy addresses immediate opportunities and long-term positioning across organic, technical, paid, and AI-driven search.</p>
-
-<h2>Search Masters Challenge</h2>
-${data.searchMasters && data.searchMasters.totalScore > 0 ? `
-<div style="background:#f8f9ff;border-left:4px solid #2c6fad;padding:16px 20px;border-radius:6px;margin-bottom:16px;">
-  <div style="font-size:1.5rem;font-weight:bold;color:#2c6fad;margin-bottom:8px;">${data.searchMasters.totalScore} points</div>
-  <div style="font-size:0.9rem;color:#64748b;">
-    ${Object.keys(data.searchMasters.answers).length}/20 questions answered · 
-    ${Object.values(data.searchMasters.answers).filter((a) => (a as {correct:boolean}).correct).length} correct
-    ${data.searchMasters.completed ? ' · Complete' : ' · In Progress'}
-  </div>
+<div class="score-strip">
+  <div class="score-item"><div class="score-num">${workshopTotal}</div><div class="score-label">Workshop Total</div></div>
+  <div class="score-item"><div class="score-num" style="color:#7c3aed">${sm?.totalScore || 0}</div><div class="score-label">Quiz Score</div></div>
+  <div class="score-item"><div class="score-num" style="color:#16a34a">${smCorrect}/${smAnswered}</div><div class="score-label">Quiz Correct</div></div>
+  <div class="score-item"><div class="score-num" style="font-size:1.3rem">${sm?.completed ? '✅ Complete' : '—'}</div><div class="score-label">Quiz Status</div></div>
 </div>
-<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
-  <tr style="background:#f1f5f9;"><th style="text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;">Question</th><th style="padding:8px 10px;border-bottom:1px solid #e2e8f0;">Result</th><th style="padding:8px 10px;border-bottom:1px solid #e2e8f0;">Points</th></tr>
-  ${Object.entries(data.searchMasters.answers).map(([id, ans]) => {
-    const a = ans as {correct:boolean;points:number;answer:string}
-    return '<tr><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:0.78rem;">' + id + '</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;color:' + (a.correct?'#16a34a':'#dc2626') + '">' + (a.correct?'✓ Correct':'✗ Incorrect') + '</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:center;">' + a.points + '</td></tr>'
-  }).join('')}
-</table>` : '<p>Search Masters Challenge not yet attempted.</p>'}
 
-${cmoEval ? `
-<h2>Board Evaluation</h2>
-${cmoEval.dimensions.map(d => `
-<div class="dim-row">
-  <span>${d.label}</span>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-weight:700;color:#2c6fad">${Math.round(d.score)}%</span>
-    <div class="dim-bar"><div class="dim-fill" style="width:${Math.min(100,d.score)}%"></div></div>
-  </div>
-</div>`).join('')}
-<div class="verdict-box">
-  <div class="verdict-label">${verdictLabel}</div>
-</div>
-` : ''}
+<h2>Activity Scores</h2>
+<table>
+  <tr><th>Activity</th><th style="text-align:center">Score</th><th style="text-align:center">Done</th></tr>
+  ${actRows}
+</table>
 
-<div class="score-box">Workshop Score: ${total} points</div>
+<h2>Search Masters Challenge — Question Results</h2>
+${sm?.totalScore ? '<div class="sm-summary">Quiz score: <strong>' + sm.totalScore + ' points</strong> · ' + smCorrect + '/' + smAnswered + ' correct</div>' : ''}
+<table>
+  <tr><th>Question</th><th>Your Answer</th><th style="text-align:center">Result</th><th style="text-align:center">Points</th></tr>
+  ${smRows}
+</table>
+
+<h2>Key Activity Responses</h2>
+${responses.a6_cwv ? '<p><strong>Core Web Vital identified:</strong> ' + responses.a6_cwv + (responses.a6_explain ? ' — ' + responses.a6_explain : '') + '</p>' : ''}
+${responses.a16_auth ? '<p><strong>AI Authority signals:</strong> ' + responses.a16_auth + '</p>' : ''}
+${responses.a16_orig ? '<p><strong>Original research opportunities:</strong> ' + responses.a16_orig + '</p>' : ''}
+
 </body>
 </html>`
 
   downloadFile(
     html,
-    `BM7621-Strategy-${team.brand}-${new Date().toISOString().slice(0, 10)}.html`,
+    `BM7621-Report-${team.name.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.html`,
     'text/html'
-  )
-}
-
-// ─── JSON BACKUP ─────────────────────────────────────────────
-export function exportJSONBackup(data: ExportData) {
-  downloadFile(
-    JSON.stringify(data, null, 2),
-    `BM7621-Backup-${data.team.name.replace(/\s+/g, '-')}-${Date.now()}.json`,
-    'application/json'
   )
 }
