@@ -132,7 +132,7 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
                       <span className="text-xs font-bold text-slate-400 w-5 text-right flex-shrink-0">{i + 1}</span>
                       <input
                         className="form-input flex-1"
-                        placeholder={`Member ${i + 1} (optional)`}
+                        placeholder={`Member ${i + 1}`}
                         value={m}
                         onChange={e => { const next = [...members]; next[i] = e.target.value; setMembers(next) }}
                       />
