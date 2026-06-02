@@ -97,7 +97,7 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
                 <input
                   type="text"
                   className="form-input text-center text-2xl font-mono font-bold uppercase tracking-widest py-4"
-                  placeholder="ALPHA24"
+                  placeholder="Enter code"
                   value={code}
                   onChange={e => setCode(e.target.value.toUpperCase())}
                   onKeyDown={e => e.key === 'Enter' && handleCode()}
@@ -117,7 +117,7 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
                 <span className="text-xs text-slate-400">{selectedTeam?.code}</span>
               </div>
               <h2 className="text-lg font-bold text-slate-900 mb-1">Team Details</h2>
-              <p className="text-sm text-slate-500 mb-5">Confirm your team name and add members.</p>
+              <p className="text-sm text-slate-500 mb-5">Enter your team name. Add as many members as are in your group — all fields are optional.</p>
 
               <div className="mb-4">
                 <label className="form-label">Team Name</label>
@@ -125,14 +125,14 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
               </div>
 
               <div className="mb-5">
-                <label className="form-label">Team Members</label>
+                <label className="form-label">Team Members <span className="text-slate-400 font-normal normal-case tracking-normal">(all optional — add however many are in your team)</span></label>
                 <div className="space-y-2">
                   {members.map((m, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-400 w-5 text-right flex-shrink-0">{i + 1}</span>
                       <input
                         className="form-input flex-1"
-                        placeholder={i === 4 ? 'Member 5 (optional)' : `Member ${i + 1}`}
+                        placeholder={`Member ${i + 1} (optional)`}
                         value={m}
                         onChange={e => { const next = [...members]; next[i] = e.target.value; setMembers(next) }}
                       />
