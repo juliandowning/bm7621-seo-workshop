@@ -76,11 +76,6 @@ export function LeaderboardPanel() {
 
   return (
     <div>
-      <div className="mb-6">
-        <div className="text-[11px] font-bold tracking-widest uppercase text-brand-500 mb-1">Live Rankings</div>
-        <h1 className="font-display text-2xl text-slate-900">Workshop Leaderboard</h1>
-        <p className="text-sm text-slate-400 mt-1">Ranked by total score · Quality score rewards depth of response, not just completion</p>
-      </div>
       <div className="card overflow-hidden">
         <table className="w-full">
           <thead>
