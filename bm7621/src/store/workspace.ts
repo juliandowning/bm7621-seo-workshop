@@ -118,6 +118,11 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           set({ syncStatus: 'offline' })
           return
         }
+        // Demo teams (id starts with 'demo-') only use localStorage
+        if (state.team.id.startsWith('demo-')) {
+          set({ syncStatus: 'saved', lastSaved: new Date().toISOString() })
+          return
+        }
         set({ syncStatus: 'saving' })
         try {
           const ok = await upsertWorkspaceData(state.team.id, {
