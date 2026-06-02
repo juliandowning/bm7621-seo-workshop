@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { CTR_ANSWERS, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, FeedbackPanel, CharCount, LockedBadge } from '../ui/shared'
+import { ActivityCard, Alert, FeedbackPanel, CharCount, LockedBadge, QualityFeedback } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
 
@@ -17,18 +17,29 @@ export function Block2Panel() {
 
   // A4 — lock+feedback
   const a4Locked = !!responses.locked_a4
+  const [a4Fb, setA4Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const [title, setTitle] = useState(responses.a4_title || '')
   const [meta, setMeta] = useState(responses.a4_meta || '')
   const [kw, setKw] = useState(responses.a4_kw || '')
 
   const scoreA4 = (t: string, m: string, k: string, lock = false) => {
     let pts = 0
-    if (t.length >= 30 && t.length <= 60) pts += 2; else if (t.length > 0) pts++
-    if (m.length >= 120 && m.length <= 160) pts += 2; else if (m.length > 0) pts++
+    const tOk = t.length >= 30 && t.length <= 60
+    const mOk = m.length >= 120 && m.length <= 160
+    if (tOk) pts += 2; else if (t.length > 0) pts++
+    if (mOk) pts += 2; else if (m.length > 0) pts++
     if (k.trim()) pts++
-    updateScore('a4', Math.min(5, pts))
+    const cPts = (t.trim() && m.trim() && k.trim()) ? 2 : (t.trim() || m.trim()) ? 1 : 0
+    const qPts = Math.min(3, pts - cPts)
+    updateScore('a4', Math.min(5, pts), 5, cPts, qPts)
     updateResponse({ a4_title: t, a4_meta: m, a4_kw: k, ...(lock ? { locked_a4: true } : {}) })
-    if (lock) lockActivity('a4')
+    if (lock) {
+      lockActivity('a4')
+      const why = (tOk && mOk) ? 'Title and meta description both within optimal character ranges — strong Quality Score signals.' :
+        !tOk ? `Title is ${t.length} chars (target 30–60). ${t.length > 60 ? 'Shorten it — Google will truncate.' : 'Expand it to include more keywords and a CTA.'}` :
+        `Meta is ${m.length} chars (target 120–160). ${m.length > 160 ? 'Shorten — Google will rewrite it.' : 'Expand to fill the available space with a compelling description.'}`
+      setA4Fb({ cPts, qPts, why })
+    }
   }
 
   // A5 — 3 questions (Q4 removed), lock+feedback
@@ -102,6 +113,7 @@ export function Block2Panel() {
           <button className="btn-success btn-sm" onClick={() => scoreA4(title, meta, kw, true)}
             disabled={!title.trim() || !meta.trim() || !kw.trim()}>Submit Answers</button>
         )}
+        {a4Locked && a4Fb && <QualityFeedback completionPts={a4Fb.cPts} qualityPts={a4Fb.qPts} qualityReason={a4Fb.why} />}
         {a4Locked && scores.a4 && (
           <FeedbackPanel
             score={scores.a4.points} max={5}

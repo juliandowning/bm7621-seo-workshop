@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakdown, SimInputs } from '../ui/shared'
+import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakdown, SimInputs, QualityFeedback } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
 
@@ -44,6 +44,7 @@ export function Block4Panel() {
 
   // A8 — E-E-A-T (displayed as A8)
   const a9Locked = !!responses.locked_a9
+  const [a9Fb, setA9Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const [eeatRatings, setEeatRatings] = useState({
     a9_exp: responses.a9_exp || 0, a9_exp2: responses.a9_exp2 || 0,
     a9_auth: responses.a9_auth || 0, a9_trust: responses.a9_trust || 0,
@@ -62,6 +63,11 @@ export function Block4Panel() {
     updateScore('a9', cPts + qPts, 5, cPts, qPts)
     updateResponse({ ...eeatRatings, ...eeatNotes, locked_a9: true })
     lockActivity('a9')
+    const why = qPts >= 3 ? 'All four E-E-A-T dimensions explained with specific evidence.' :
+      qPts === 2 ? 'Good — two or three notes have specific evidence. Add more detail on the remaining dimensions.' :
+      qPts === 1 ? 'Only one note has sufficient detail. Each E-E-A-T note should name specific signals (e.g. press coverage, certifications, review platforms).' :
+      'Notes are too brief. For each dimension, describe specific evidence — what does your brand actually do to demonstrate this signal?'
+    setA9Fb({ cPts, qPts, why })
   }
 
   // A9 — Topic Cluster (displayed as A9)
@@ -131,6 +137,7 @@ export function Block4Panel() {
           <button className="btn-success btn-sm" onClick={submitA9}
             disabled={Object.values(eeatRatings).some(v => v === 0)}>Submit Answers</button>
         )}
+        {a9Locked && a9Fb && <QualityFeedback completionPts={a9Fb.cPts} qualityPts={a9Fb.qPts} qualityReason={a9Fb.why} />}
         {a9Locked && scores.a9 && (
           <FeedbackPanel
             score={scores.a9.points} max={5}

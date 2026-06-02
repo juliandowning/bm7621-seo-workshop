@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { A17_AI_CORRECT, A17_HUMAN_CORRECT, A17_ALL_ITEMS, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge } from '../ui/shared'
+import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, QualityFeedback } from '../ui/shared'
 import { SearchMastersPanel } from './SearchMasters'
 import { cn } from '../../lib/utils'
 
@@ -13,6 +13,7 @@ export function Block7Panel() {
 
   // A18 — AI Visibility
   const a16Locked = !!responses.locked_a16
+  const [a16Fb, setA16Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const [a16, setA16] = useState({
     auth: responses.a16_auth || '', cite: responses.a16_cite || '',
     orig: responses.a16_orig || '', struct: responses.a16_struct || '',
@@ -26,6 +27,11 @@ export function Block7Panel() {
     updateScore('a16', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a16_auth: a16.auth, a16_cite: a16.cite, a16_orig: a16.orig, a16_struct: a16.struct, locked_a16: true })
     lockActivity('a16')
+    const why = qPts >= 3 ? 'Strong AI visibility analysis — good use of authority, citation, original research and structured content concepts.' :
+      qPts === 2 ? 'Good foundation. Strengthen by naming specific types of original research or structured content your brand could produce.' :
+      qPts === 1 ? 'Analysis is too general. Name specific signals — e.g. which publications should cite you, what schema types to add.' :
+      'Each field needs specific, actionable observations. What exactly should your brand do in each dimension?'
+    setA16Fb({ cPts, qPts, why })
   }
 
   // A19 — AI vs Human
@@ -77,6 +83,7 @@ export function Block7Panel() {
         {!a16Locked && (
           <button className="btn-success btn-sm mt-3" onClick={submitA16} disabled={Object.values(a16).some(v => v.length < 50)}>Submit Answers</button>
         )}
+        {a16Locked && a16Fb && <QualityFeedback completionPts={a16Fb.cPts} qualityPts={a16Fb.qPts} qualityReason={a16Fb.why} />}
         {a16Locked && scores.a16 && (
           <FeedbackPanel
             score={scores.a16.points} max={5}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { A11_ANSWERS, NEG_KW_CORRECT, NEG_KW_ALL, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel } from '../ui/shared'
+import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel, QualityFeedback } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -69,6 +69,7 @@ export function Block5Panel() {
   })
   const [rationale, setRationale] = useState(responses.a13_rationale || '')
   const a13Locked = !!responses.locked_a13
+  const [a13Fb, setA13Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const total = Object.values(budget).reduce((s, v) => s + v, 0)
 
   const submitA13 = () => {
@@ -78,6 +79,11 @@ export function Block5Panel() {
     updateScore('a13', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a13_brand: budget.brand, a13_generic: budget.generic, a13_comp: budget.comp, a13_retarg: budget.retarg, a13_rationale: rationale, locked_a13: true })
     lockActivity('a13')
+    const why = qPts >= 3 ? 'Excellent — rationale uses strong paid media vocabulary (ROI, conversion, retargeting, intent).' :
+      qPts === 2 ? 'Good rationale. Strengthen by referencing why you allocated more/less to each campaign type specifically.' :
+      qPts === 1 ? 'Rationale mentions some relevant concepts but needs more commercial depth — reference ROI, conversion intent, or ROAS.' :
+      'Rationale is too generic. Explain why you chose each split — e.g. why brand gets X% and retargeting gets Y%.'
+    setA13Fb({ cPts, qPts, why })
   }
 
   // SIM 3
@@ -245,6 +251,7 @@ export function Block5Panel() {
         {!a13Locked && (
           <button className="btn-success btn-sm mt-3" onClick={submitA13} disabled={total !== 10000 || rationale.length < 50}>Submit Answers</button>
         )}
+        {a13Locked && a13Fb && <QualityFeedback completionPts={a13Fb.cPts} qualityPts={a13Fb.qPts} qualityReason={a13Fb.why} />}
         {a13Locked && scores.a13 && (
           <FeedbackPanel
             score={scores.a13.points} max={5}

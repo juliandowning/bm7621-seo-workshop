@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { TECH_MATRIX_CORRECT, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, CharCount, LockedBadge, FeedbackPanel } from '../ui/shared'
+import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel, QualityFeedback } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -24,6 +24,7 @@ export function Block3Panel() {
 
   // A6 — lock+feedback
   const a6Locked = !!responses.locked_a6
+  const [a6Fb, setA6Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const [cwv, setCwv] = useState(responses.a6_cwv || '')
   const [explain, setExplain] = useState(responses.a6_explain || '')
 
@@ -33,9 +34,16 @@ export function Block3Panel() {
     if (cwv) pts += 2
     if (explain.length >= 50) pts += 2
     if (explain.length >= 150) pts++
-    updateScore('a6', Math.min(5, pts))
+    const cPts = cwv && explain.length >= 50 ? 2 : cwv || explain.length > 0 ? 1 : 0
+    const qPts = Math.min(3, pts - cPts)
+    updateScore('a6', Math.min(5, pts), 5, cPts, qPts)
     updateResponse({ a6_cwv: cwv, a6_explain: explain, locked_a6: true })
     lockActivity('a6')
+    const why = qPts >= 3 ? 'Excellent — clear CWV selection with a detailed explanation.' :
+      qPts === 2 ? 'Good explanation. Add more detail on the specific business impact for full marks.' :
+      qPts === 1 ? 'Basic explanation. Describe specifically what causes this CWV issue and how to fix it.' :
+      'Explanation too short. Write at least 50 characters explaining why this CWV matters for your brand.'
+    setA6Fb({ cPts, qPts, why })
   }
 
   // A7 — lock+feedback
@@ -101,6 +109,7 @@ export function Block3Panel() {
         {!a6Locked && (
           <button className="btn-success btn-sm mt-3" onClick={submitA6} disabled={!cwv || explain.length < 50}>Submit Answers</button>
         )}
+        {a6Locked && a6Fb && <QualityFeedback completionPts={a6Fb.cPts} qualityPts={a6Fb.qPts} qualityReason={a6Fb.why} />}
         {a6Locked && scores.a6 && (
           <FeedbackPanel
             score={scores.a6.points} max={5}

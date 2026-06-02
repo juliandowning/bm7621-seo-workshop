@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { SEARCH_CONSOLE_DATA, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, SimInputs, CharCount, FeedbackPanel, LockedBadge } from '../ui/shared'
+import { ActivityCard, Alert, SimInputs, CharCount, FeedbackPanel, LockedBadge, QualityFeedback } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
 
@@ -22,20 +22,32 @@ export function Block6Panel() {
 
   // A17 — Search Console (lock+feedback)
   const a15Locked = !!responses.locked_a15
+  const [a15Fb, setA15Fb] = useState<{cPts:number;qPts:number;why:string}|null>(null)
   const [a15, setA15] = useState({ high: responses.a15_high || '', low: responses.a15_low || '', opp: responses.a15_opp || '', action: responses.a15_action || '' })
 
   const submitA15 = () => {
     if (a15Locked) return
     const h = a15.high.toLowerCase(); const l = a15.low.toLowerCase(); const o = a15.opp.toLowerCase()
     let pts = 0
-    if (h.includes('category')) pts++
-    if (l.includes('category')) pts++
-    if (o.includes('category') || o.includes('informational')) pts++
+    const h_correct = h.includes('category')
+    const l_correct = l.includes('category')
+    const o_correct = o.includes('category') || o.includes('informational')
+    if (h_correct) pts++
+    if (l_correct) pts++
+    if (o_correct) pts++
     if (a15.action.length > 40) pts++
     if (a15.action.length > 100) pts++
-    updateScore('a15', Math.min(5, pts))
+    const correct = [h_correct, l_correct, o_correct].filter(Boolean).length
+    const cPts = a15.action.length > 40 ? 2 : 1
+    const qPts = Math.min(3, correct + (a15.action.length > 100 ? 1 : 0))
+    updateScore('a15', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a15_high: a15.high, a15_low: a15.low, a15_opp: a15.opp, a15_action: a15.action, locked_a15: true })
     lockActivity('a15')
+    const why = correct === 3 ? 'All three keywords correctly identified — "category keyword" has the highest impressions, lowest CTR, and biggest opportunity.' :
+      correct === 2 ? `${3-correct} identification incorrect. The category keyword (85k impressions, 1% CTR, position 8.4) is the answer for all three.` :
+      correct === 1 ? 'Two identifications incorrect. Look for the keyword with the highest impressions AND lowest CTR — that gap is the opportunity.' :
+      'Focus on "category keyword" — 85,000 impressions, only 1% CTR, position 8.4. Moving to position 3 would 9× clicks from the same impressions.'
+    setA15Fb({ cPts, qPts: Math.min(3,qPts), why })
   }
 
   const a15Correct = (() => {
@@ -120,6 +132,7 @@ export function Block6Panel() {
         {!a15Locked && (
           <button className="btn-success btn-sm mt-3" onClick={submitA15} disabled={a15.action.length < 50}>Submit Answers</button>
         )}
+        {a15Locked && a15Fb && <QualityFeedback completionPts={a15Fb.cPts} qualityPts={a15Fb.qPts} qualityReason={a15Fb.why} />}
         {a15Locked && scores.a15 && (
           <FeedbackPanel
             score={scores.a15.points} max={5}
