@@ -74,7 +74,7 @@ function WorkshopApp() {
         <div className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(s => !s)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700 text-lg"
+            className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700 text-xl font-bold flex-shrink-0"
             aria-label="Toggle menu"
           >
             {sidebarOpen ? '✕' : '☰'}
