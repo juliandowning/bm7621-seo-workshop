@@ -26,7 +26,7 @@ export function LeaderboardPanel() {
   const myScore = selectTotalScore(scores) + Object.values(simulators).reduce((s, v) => s + (v?.points || 0), 0)
   const myCompleted = Object.values(scores).filter(s => s?.completed).length
   const myQuality = selectAvgQuality(scores)
-  const totalActs = 23 // 19 activities + 4 sims
+  const totalActs = 22 // 18 activities + 4 sims
 
   const [entries, setEntries] = useState<LeaderboardEntry[]>(() =>
     BRANDS.map(b => ({
