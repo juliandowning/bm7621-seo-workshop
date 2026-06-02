@@ -11,6 +11,7 @@ import { Block4Panel } from './components/activities/Block4'
 import { Block5Panel } from './components/activities/Block5'
 import { Block6Panel } from './components/activities/Block6'
 import { Block7Panel } from './components/activities/Block7'
+import { SearchMastersPanel } from './components/activities/SearchMasters'
 import { LeaderboardPanel } from './components/leaderboard/LeaderboardPanel'
 import { ExportsPanel } from './components/exports/ExportsPanel'
 import { FacilitatorDashboard } from './components/facilitator/FacilitatorDashboard'
@@ -25,7 +26,7 @@ const PANEL_META: Record<Panel, { title: string; subtitle: string }> = {
   block4: { title: 'Content Optimisation', subtitle: 'Block 4 · Topic Clusters, E-E-A-T & Local SEO' },
   block5: { title: 'Google Ads', subtitle: 'Block 5 · Ad Policy, Negatives & Budget Strategy' },
   block6: { title: 'Measurement', subtitle: 'Block 6 · Campaign Diagnosis & Search Console' },
-  block7: { title: 'AI & Future Search', subtitle: 'Block 7 · AI Visibility & CMO Strategy' },
+  block7: { title: 'AI & Future Search', subtitle: 'Block 7 · AI Visibility, AI vs Human & Search Masters Challenge' },
   leaderboard: { title: 'Workshop Leaderboard', subtitle: 'Live Rankings' },
   exports: { title: 'Export Centre', subtitle: 'Download Your Work' },
 }
