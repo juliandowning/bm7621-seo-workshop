@@ -160,10 +160,12 @@ interface WinnerScreenProps {
   avgQuality: number
   teamName: string
   brand: string
+  answeredCount: number
+  correctCount: number
 }
-function WinnerScreen({ smScore, totalWorkshopScore, avgQuality, teamName, brand }: WinnerScreenProps) {
-  const pct = Math.round(smScore / MAX_SCORE * 100)
-  const grade = pct >= 80 ? '🥇 Search Master' : pct >= 60 ? '🥈 Search Expert' : pct >= 40 ? '🥉 Search Practitioner' : '📚 Keep Learning'
+function WinnerScreen({ smScore, totalWorkshopScore, avgQuality, teamName, brand, answeredCount, correctCount }: WinnerScreenProps) {
+  const questionPct = Math.round(answeredCount / QUESTIONS.length * 100)
+  const grade = smScore >= 35 ? '🥇 Search Master' : smScore >= 25 ? '🥈 Search Expert' : smScore >= 15 ? '🥉 Search Practitioner' : '📚 Keep Learning'
 
   return (
     <div className="card-p text-center">
@@ -176,33 +178,43 @@ function WinnerScreen({ smScore, totalWorkshopScore, avgQuality, teamName, brand
         {grade}
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-2">
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <div className="text-3xl font-bold text-violet-600">{smScore}</div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Quiz Score</div>
-          <div className="text-xs text-slate-400">out of {MAX_SCORE}</div>
+          <div className="text-xs text-slate-400">out of {MAX_SCORE} pts · {correctCount}/{answeredCount} correct</div>
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <div className="text-3xl font-bold text-brand-600">{totalWorkshopScore}</div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Workshop Total</div>
+          <div className="text-xs text-slate-400">all activities + sims + quiz</div>
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <div className="text-3xl font-bold text-emerald-600">{avgQuality > 0 ? `${avgQuality}/3` : '—'}</div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Avg Quality</div>
+          <div className="text-xs text-slate-400">depth of written responses</div>
         </div>
       </div>
 
-      <div className="mb-3">
+      {/* Definitions */}
+      <div className="text-left bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4 space-y-2">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Score Definitions</div>
+        <div className="text-xs text-slate-600"><strong className="text-violet-700">Quiz Score</strong> — points earned in the Search Masters Challenge (max {MAX_SCORE}). Easy=1pt · Medium=2pts · Hard=3pts · Final=10pts.</div>
+        <div className="text-xs text-slate-600"><strong className="text-brand-700">Workshop Total</strong> — combined score across all activities, simulators, and the quiz. This is your overall rank on the leaderboard.</div>
+        <div className="text-xs text-slate-600"><strong className="text-emerald-700">Avg Quality</strong> — average quality score across written activities (0–3). Rewards conceptual depth over word count.</div>
+      </div>
+
+      <div className="mb-4">
         <div className="flex justify-between text-xs text-slate-500 mb-1">
-          <span>Quiz completion</span>
-          <span>{pct}%</span>
+          <span>Questions answered</span>
+          <span>{answeredCount}/{QUESTIONS.length}</span>
         </div>
         <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-          <div className="h-full bg-violet-500 rounded-full transition-all duration-1000" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-violet-500 rounded-full transition-all duration-1000" style={{ width: `${questionPct}%` }} />
         </div>
       </div>
 
-      <p className="text-xs text-slate-400 mt-6">Results saved · Check the leaderboard to see how you compare with other teams</p>
+      <p className="text-xs text-slate-400">Results saved · Check the leaderboard to see how you compare with other teams</p>
     </div>
   )
 }
@@ -295,6 +307,8 @@ export function SearchMastersPanel() {
           avgQuality={avgQuality}
           teamName={team?.name || 'Team'}
           brand={team?.brand || ''}
+          answeredCount={Object.keys(searchMasters?.answers || {}).length}
+          correctCount={Object.values(searchMasters?.answers || {}).filter(a => a.correct).length}
         />
       </div>
     )
