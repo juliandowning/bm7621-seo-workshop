@@ -17,21 +17,21 @@ export const ACTIVITY_DISPLAY_NUM: Record<ActivityKey, number> = {
   a1: 1, a2: 2, a3: 3,
   a4: 4, a5: 5,
   a6: 6, a7: 7,
-  a9: 8, a8: 9, a10: 10, a10b: 11,
-  a11: 12, a12: 13, a12b: 14, a13: 15,
-  a14: 16, a15: 17,
-  a16: 18, a17: 19, a18: 20,
+  a9: 8, a8: 9, a10b: 10,
+  a11: 11, a12: 12, a12b: 13, a13: 14,
+  a15: 15,
+  a16: 16, a17: 17, a18: 18,
   sim1: 0, sim2: 0, sim3: 0, sim4: 0, sim5: 0,
 }
 
 // ─── ACTIVITY ORDERING ───────────────────────────────────────
 export const ACTIVITY_ORDER: ActivityKey[] = [
-  'a1', 'a2', 'a3', 'sim1',
+  'a1', 'a2', 'a3',
   'a4', 'a5',
-  'a6', 'a7', 'sim2',
-  'a9', 'a8', 'a10', 'a10b',
-  'a11', 'a12', 'a12b', 'sim4', 'a13', 'sim3',
-  'a14', 'a15', 'sim5',
+  'a6', 'a7',
+  'a9', 'a8', 'a10b', 'sim1',
+  'a11', 'a12', 'a12b', 'a13', 'sim3',
+  'sim4', 'a15', 'sim5',
   'a16', 'a17', 'a18',
 ]
 
@@ -47,14 +47,12 @@ export const ACTIVITY_LABELS: Record<ActivityKey, string> = {
   sim2: 'Conversion Lab',
   a9: 'E-E-A-T Audit',
   a8: 'Topic Cluster Builder',
-  a10: 'Local SEO Challenge',
   a10b: 'Content Makeover Challenge',
   a11: 'Will The Ads Serve?',
   a12: 'Negative Keyword Challenge',
   a12b: 'Writing a Search Ad',
   a13: 'Budget Allocation Challenge',
-  sim3: 'ROAS Lab',
-  a14: 'Campaign Diagnosis',
+  sim3: 'Paid Media Lab',
   a15: 'Search Console Investigation',
   sim4: 'Analytics Lab 1',
   sim5: 'Analytics Lab 2',
@@ -64,12 +62,12 @@ export const ACTIVITY_LABELS: Record<ActivityKey, string> = {
 }
 
 export const BLOCK_STRUCTURE = [
-  { id: 1, label: 'SEO Foundations', activities: ['a1', 'a2', 'a3', 'sim1'] as ActivityKey[], color: 'blue' },
+  { id: 1, label: 'SEO Foundations', activities: ['a1', 'a2', 'a3'] as ActivityKey[], color: 'blue' },
   { id: 2, label: 'Understanding Search', activities: ['a4', 'a5'] as ActivityKey[], color: 'teal' },
-  { id: 3, label: 'Technical SEO', activities: ['a6', 'a7', 'sim2'] as ActivityKey[], color: 'purple' },
-  { id: 4, label: 'Content Optimisation', activities: ['a9', 'a8', 'a10', 'a10b'] as ActivityKey[], color: 'blue' },
-  { id: 5, label: 'Google Ads', activities: ['a11', 'a12', 'a12b', 'sim4', 'a13', 'sim3'] as ActivityKey[], color: 'amber' },
-  { id: 6, label: 'Measurement', activities: ['a14', 'a15', 'sim5'] as ActivityKey[], color: 'teal' },
+  { id: 3, label: 'Technical SEO', activities: ['a6', 'a7'] as ActivityKey[], color: 'purple' },
+  { id: 4, label: 'Content Optimisation', activities: ['a9', 'a8', 'a10b', 'sim1'] as ActivityKey[], color: 'blue' },
+  { id: 5, label: 'Google Ads', activities: ['a11', 'a12', 'a12b', 'a13', 'sim3'] as ActivityKey[], color: 'amber' },
+  { id: 6, label: 'Measurement', activities: ['sim4', 'a15', 'sim5'] as ActivityKey[], color: 'teal' },
   { id: 7, label: 'AI & Strategy', activities: ['a16', 'a17', 'a18'] as ActivityKey[], color: 'purple' },
 ]
 
