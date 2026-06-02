@@ -169,6 +169,27 @@ export function ScoreBreakdown({ completionPts, qualityPts }: ScoreBreakdownProp
   )
 }
 
+// ─── QUALITY FEEDBACK ────────────────────────────────────────
+interface QualityFeedbackProps {
+  completionPts: number
+  qualityPts: number
+  qualityReason: string
+}
+export function QualityFeedback({ completionPts, qualityPts, qualityReason }: QualityFeedbackProps) {
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${completionPts >= 2 ? 'bg-emerald-50 text-emerald-700' : completionPts === 1 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600'}`}>
+        <span className="font-bold w-16 flex-shrink-0">Completion: {completionPts}/2</span>
+        <span>{completionPts >= 2 ? 'All required fields completed' : completionPts === 1 ? 'Some fields completed' : 'Required fields missing'}</span>
+      </div>
+      <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${qualityPts >= 3 ? 'bg-emerald-50 text-emerald-700' : qualityPts >= 2 ? 'bg-brand-50 text-brand-700' : qualityPts === 1 ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-500'}`}>
+        <span className="font-bold w-16 flex-shrink-0">Quality: {qualityPts}/3</span>
+        <span>{qualityReason}</span>
+      </div>
+    </div>
+  )
+}
+
 // ─── BOARD OPTION SELECTOR ───────────────────────────────────
 interface BoardOption { id: string; label: string; desc: string }
 interface BoardOptionGroupProps {
