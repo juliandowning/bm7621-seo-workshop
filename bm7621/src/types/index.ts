@@ -11,9 +11,9 @@ export type ActivityKey =
   | 'a1' | 'a2' | 'a3' | 'sim1'
   | 'a4' | 'a5'
   | 'a6' | 'a7' | 'sim2'
-  | 'a9' | 'a8' | 'a10' | 'a10b'
+  | 'a9' | 'a8' | 'a10b'
   | 'a11' | 'a12' | 'a12b' | 'a13' | 'sim3'
-  | 'a14' | 'a15' | 'sim4' | 'sim5'
+  | 'a15' | 'sim4' | 'sim5'
   | 'a16' | 'a17' | 'a18'
 
 export interface ActivityScore {
@@ -35,7 +35,6 @@ export interface ResponseMap {
   a9_exp_note?: string; a9_exp2_note?: string; a9_auth_note?: string; a9_trust_note?: string
   a8_pillar?: string; a8_s1?: string; a8_s2?: string; a8_s3?: string
   a8_q1?: string; a8_q2?: string; a8_q3?: string
-  a10_gbp?: string; a10_reviews?: string; a10_citations?: string; a10_nap?: string
   a10b_heading?: string; a10b_intro?: string
   a10b_imp1?: string; a10b_imp2?: string; a10b_imp3?: string; a10b_why?: string
   a11_a?: string; a11_b?: string; a11_c?: string
@@ -44,7 +43,6 @@ export interface ResponseMap {
   a12b_d1?: string; a12b_d2?: string; a12b_cta?: string
   a13_brand?: number; a13_generic?: number; a13_comp?: number; a13_retarg?: number
   a13_rationale?: string
-  a14_e1?: string; a14_e2?: string; a14_e3?: string; a14_next?: string
   a15_high?: string; a15_low?: string; a15_opp?: string; a15_action?: string
   a16_auth?: string; a16_cite?: string; a16_orig?: string; a16_struct?: string
   a17_ai?: string[]; a17_human?: string[]
@@ -57,7 +55,7 @@ export interface ResponseMap {
   locked_a6?: boolean; locked_a7?: boolean
   locked_a9?: boolean; locked_a8?: boolean; locked_a10?: boolean; locked_a10b?: boolean
   locked_a11?: boolean; locked_a12?: boolean; locked_a12b?: boolean; locked_a13?: boolean
-  locked_a14?: boolean; locked_a15?: boolean
+  locked_a15?: boolean
   locked_a16?: boolean; locked_a17?: boolean; locked_a18?: boolean
 }
 
