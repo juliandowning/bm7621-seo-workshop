@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { WorkspaceState, Team, ScoreMap, ResponseMap, SimulatorMap, CMOEvaluation, ActivityKey } from '../types'
+import type { WorkspaceState, Team, ScoreMap, ResponseMap, SimulatorMap, CMOEvaluation, ActivityKey, SearchMastersState, SearchMastersAnswer } from '../types'
 import { upsertWorkspaceData, isSupabaseConfigured } from '../lib/supabase'
 
 interface WorkspaceStore extends WorkspaceState {
@@ -15,6 +15,8 @@ interface WorkspaceStore extends WorkspaceState {
   syncToSupabase: () => Promise<void>
   exportJSON: () => string
   importJSON: (json: string) => boolean
+  submitSMAnswer: (answer: SearchMastersAnswer) => void
+  lockSearchMasters: () => void
 }
 
 let syncTimeout: ReturnType<typeof setTimeout> | null = null
@@ -27,6 +29,7 @@ const initialState: WorkspaceState = {
   cmoEval: null,
   syncStatus: 'idle',
   lastSaved: null,
+  searchMasters: null,
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>()(
@@ -132,6 +135,25 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }
       },
 
+      submitSMAnswer: (answer) => {
+        set(state => {
+          const prev = state.searchMasters || { answers: {}, totalScore: 0, completed: false, completedAt: null }
+          const answers = { ...prev.answers, [answer.questionId]: answer }
+          const totalScore = Object.values(answers).reduce((s: number, a) => s + (a as {points:number}).points, 0)
+          return { searchMasters: { ...prev, answers, totalScore }, syncStatus: 'idle' }
+        })
+        scheduledSync(get)
+      },
+
+      lockSearchMasters: () => {
+        set(state => {
+          if (!state.searchMasters) return state
+          const sm = { ...state.searchMasters, completed: true, completedAt: new Date().toISOString() }
+          return { searchMasters: sm, syncStatus: 'idle' }
+        })
+        scheduledSync(get)
+      },
+
       exportJSON: () => {
         const { team, scores, responses, simulators, cmoEval } = get()
         return JSON.stringify({ team, scores, responses, simulators, cmoEval, exportedAt: new Date().toISOString() }, null, 2)
@@ -161,6 +183,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         simulators: state.simulators,
         cmoEval: state.cmoEval,
         lastSaved: state.lastSaved,
+        searchMasters: state.searchMasters,
       }),
     }
   )
