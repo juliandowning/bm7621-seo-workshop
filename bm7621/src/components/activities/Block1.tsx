@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { INTENT_KEYS, EXAMPLE_SEEDS, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, SimInputs, LockedBadge, FeedbackPanel, CharCount } from '../ui/shared'
+import { ActivityCard, Alert, LockedBadge, FeedbackPanel, CharCount } from '../ui/shared'
 import type { Brand } from '../../types'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -68,19 +68,6 @@ export function Block1Panel() {
     updateScore('a3', Math.min(5, pts))
     updateResponse({ a3_serp: serpChecked, a3_obs: obs, locked_a3: true })
     lockActivity('a3')
-  }
-
-  // SIM1
-  const sim1 = simulators['sim1']
-  const [simVals, setSimVals] = useState<(number | null)[]>(sim1?.scores || [null, null, null, null, null])
-
-  const handleSim = (vals: (number | null)[]) => {
-    setSimVals(vals); updateSimulator('sim1', vals)
-    const valid = vals.filter((v): v is number => v !== null)
-    if (valid.length > 0) {
-      const avg = valid.reduce((a, b) => a + b, 0) / valid.length
-      updateScore('sim1', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
-    }
   }
 
   const a2Correct = (() => {
@@ -208,15 +195,6 @@ export function Block1Panel() {
           />
         )}
       </ActivityCard>
-
-      {/* SIM 1 */}
-      <ActivityCard number="SIM" title="Search Lab — Simulator" subtitle="Enter individual student scores from Search Lab" points={scores.sim1?.points || 0} isSimulator>
-        <Alert type="info">📊 Enter each team member's Search Lab score. Blanks are ignored. Auto-converted to workshop points.</Alert>
-        <SimInputs values={simVals} onChange={handleSim} memberCount={team?.members.length || 5} />
-        {sim1 && sim1.average !== null && (
-          <div className="alert-success mt-3">Average: <strong>{sim1.average.toFixed(1)}</strong> → <strong>{sim1.points} workshop points</strong></div>
-        )}
-      </ActivityCard>
-    </div>
+</div>
   )
 }

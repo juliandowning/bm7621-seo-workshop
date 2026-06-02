@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakdown } from '../ui/shared'
+import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakdown, SimInputs } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
 
@@ -39,7 +39,7 @@ Conclusion
 In summary, getting traffic is important and you should try different things to get it. Good luck with your website.`
 
 export function Block4Panel() {
-  const { team, scores, responses, updateScore, updateResponse, lockActivity } = useWorkspaceStore()
+  const { team, scores, responses, simulators, updateScore, updateResponse, updateSimulator, lockActivity } = useWorkspaceStore()
   const brand = team?.brand || 'ASOS'
 
   // A8 — E-E-A-T (displayed as A8)
@@ -81,24 +81,7 @@ export function Block4Panel() {
     lockActivity('a8')
   }
 
-  // A10 — Local SEO (displayed as A10)
-  const a10Locked = !!responses.locked_a10
-  const [a10, setA10] = useState({
-    gbp: responses.a10_gbp || '', reviews: responses.a10_reviews || '',
-    citations: responses.a10_citations || '', nap: responses.a10_nap || '',
-  })
-
-  const submitA10 = () => {
-    if (a10Locked) return
-    const fields = Object.values(a10)
-    const cPts = calcCompletionPts(fields, 50)
-    const qPts = calcQualityPts(fields.join(' '), ['local', 'google', 'review', 'citation', 'nap', 'consist', 'directory', 'gbp', 'map'])
-    updateScore('a10', Math.min(5, cPts + qPts), 5, cPts, qPts)
-    updateResponse({ a10_gbp: a10.gbp, a10_reviews: a10.reviews, a10_citations: a10.citations, a10_nap: a10.nap, locked_a10: true })
-    lockActivity('a10')
-  }
-
-  // A11 — Content Makeover (displayed as A11)
+  // A10 — Content Makeover (displayed as A10)
   const a10bLocked = !!responses.locked_a10b
   const [a10b, setA10b] = useState({
     heading: responses.a10b_heading || '', intro: responses.a10b_intro || '',
@@ -114,6 +97,18 @@ export function Block4Panel() {
     updateScore('a10b', Math.min(5, cPts + qPts), 5, cPts, qPts)
     updateResponse({ a10b_heading: a10b.heading, a10b_intro: a10b.intro, a10b_imp1: a10b.imp1, a10b_imp2: a10b.imp2, a10b_imp3: a10b.imp3, a10b_why: a10b.why, locked_a10b: true })
     lockActivity('a10b')
+  }
+
+
+  // SIM 1 — Search Lab (end of Block 4)
+  const [sim1Vals, setSim1Vals] = useState<(number | null)[]>(simulators['sim1']?.scores || [null, null, null, null, null])
+  const handleSim1 = (vals: (number | null)[]) => {
+    updateSimulator('sim1', vals)
+    const valid = vals.filter((v): v is number => v !== null)
+    if (valid.length > 0) {
+      const avg = valid.reduce((a, b) => a + b, 0) / valid.length
+      updateScore('sim1', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
+    }
   }
 
   return (
@@ -194,47 +189,6 @@ export function Block4Panel() {
           />
         )}
       </ActivityCard>
-
-      {/* A10 — Local SEO */}
-      <ActivityCard number={N.a10} title="Local SEO Challenge" subtitle="Provide Local SEO recommendations for your brand" points={scores.a10?.points || 0}>
-        <Alert type="info">📍 Even global brands have a local SEO opportunity. Min 50 chars per field.</Alert>
-        {a10Locked && <div className="mb-3"><LockedBadge /></div>}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { key: 'gbp' as const, label: 'Google Business Profile', placeholder: 'Consider: categories, photos, posts, Q&A, products, services — what should be optimised?', hint: 'Think about category accuracy, photo quality, regular posts, and whether Q&A is being actively managed.' },
-            { key: 'reviews' as const, label: 'Reviews Strategy', placeholder: 'Consider: how to generate more reviews, how to respond, what platforms matter most...', hint: 'Reviews on Google, Trustpilot and sector-specific platforms all influence Local Pack rankings and trust.' },
-            { key: 'citations' as const, label: 'Citations & Directories', placeholder: 'Consider: which directories matter for your sector, consistency requirements...', hint: 'Citations are any online mention of your NAP. Inconsistent citations confuse Google and suppress Local Pack rankings.' },
-            { key: 'nap' as const, label: 'NAP Consistency', placeholder: 'Consider: where NAP data appears, how to audit it, what to do when it conflicts...', hint: 'NAP = Name, Address, Phone. Every listing must be identical — even minor variations (St vs Street) cause problems.' },
-          ].map(field => (
-            <div key={field.key}>
-              <label className="form-label">{field.label}</label>
-              <div className="alert-info text-xs mb-1.5">{field.hint}</div>
-              <textarea className="form-textarea" rows={3} disabled={a10Locked} placeholder={field.placeholder}
-                value={a10[field.key]} onChange={e => setA10(prev => ({ ...prev, [field.key]: e.target.value }))} />
-              <CharCount value={a10[field.key]} min={50} max={250} />
-            </div>
-          ))}
-        </div>
-        {!a10Locked && (
-          <button className="btn-success btn-sm mt-3" onClick={submitA10}
-            disabled={Object.values(a10).some(v => v.length < 50)}>Submit Answers</button>
-        )}
-        {a10Locked && scores.a10 && (
-          <FeedbackPanel
-            score={scores.a10.points} max={5}
-            completionPts={scores.a10.completionPts} qualityPts={scores.a10.qualityPts}
-            why="Completion: all 4 fields with 50+ chars = 2pts. Quality: use of local SEO terminology (NAP, citations, GBP, consistency) increases quality score."
-            example="GBP: Ensure primary category matches core business (e.g. 'Clothing Store' not 'Retail'). Upload 10+ high-quality product photos. Create weekly Google Posts featuring new arrivals and offers. Actively manage Q&A section. Reviews: Email post-purchase review request. Respond to all reviews within 24hrs — both positive and negative. Prioritise Google then Trustpilot. Citations: List in Yell, Thomson Local, Yelp UK, industry directories. Use BrightLocal to audit existing citations for NAP inconsistencies."
-            keyLearning={[
-              'Google Business Profile is the single most important asset for local search — keep it complete and active.',
-              'Review velocity (how frequently you get new reviews) matters as much as star rating.',
-              'NAP inconsistency is a silent rankings killer — a single rogue listing can suppress the whole profile.',
-              'Local Pack results (the 3-pack map) often have higher CTR than position 1 organic results.',
-            ]}
-          />
-        )}
-      </ActivityCard>
-
       {/* A11 — Content Makeover */}
       <ActivityCard number={N.a10b} title="Content Makeover Challenge" subtitle="Improve an underperforming article" points={scores.a10b?.points || 0}>
         <Alert type="warning">📝 The article below has several quality problems. Improve it using SEO and E-E-A-T principles.</Alert>
@@ -281,6 +235,15 @@ export function Block4Panel() {
               'Google\'s Quality Raters Manual specifically flags "thin content" — content that lacks depth, specificity and genuine value.',
             ]}
           />
+        )}
+      </ActivityCard>
+
+      {/* SIM 1 — Search Lab */}
+      <ActivityCard number="SIM" title="Search Lab — Simulator" subtitle="Enter individual student scores from Search Lab" points={scores.sim1?.points || 0} isSimulator>
+        <Alert type="info">📊 Enter each team member's Search Lab score. Blanks are ignored. Auto-converted to workshop points.</Alert>
+        <SimInputs values={sim1Vals} onChange={vals => { setSim1Vals(vals); handleSim1(vals) }} memberCount={team?.members.length || 5} />
+        {simulators['sim1']?.average !== null && simulators['sim1'] && (
+          <div className="alert-success mt-3">Average: <strong>{simulators['sim1'].average?.toFixed(1)}</strong> → <strong>{simulators['sim1'].points} workshop points</strong></div>
         )}
       </ActivityCard>
     </div>

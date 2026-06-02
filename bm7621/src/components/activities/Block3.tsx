@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
 import { TECH_MATRIX_CORRECT, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
-import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel } from '../ui/shared'
+import { ActivityCard, Alert, CharCount, LockedBadge, FeedbackPanel } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -70,18 +70,6 @@ export function Block3Panel() {
     const setters = { now: setA7now, next: setA7next, monitor: setA7monitor }
     const current = col === 'now' ? a7now : col === 'next' ? a7next : a7monitor
     setters[col](current.includes(item) ? current.filter(x => x !== item) : [...current, item])
-  }
-
-  // SIM 2
-  const sim2 = simulators['sim2']
-  const [simVals, setSimVals] = useState<(number | null)[]>(sim2?.scores || [null, null, null, null, null])
-  const handleSim = (vals: (number | null)[]) => {
-    setSimVals(vals); updateSimulator('sim2', vals)
-    const valid = vals.filter((v): v is number => v !== null)
-    if (valid.length > 0) {
-      const avg = valid.reduce((a, b) => a + b, 0) / valid.length
-      updateScore('sim2', avg >= 90 ? 5 : avg >= 80 ? 4 : avg >= 70 ? 3 : avg >= 60 ? 2 : 1)
-    }
   }
 
   return (
@@ -165,15 +153,6 @@ export function Block3Panel() {
           />
         )}
       </ActivityCard>
-
-      {/* SIM 2 */}
-      <ActivityCard number="SIM" title="Conversion Lab — Simulator" subtitle="Enter individual student scores from Conversion Lab" points={scores.sim2?.points || 0} isSimulator>
-        <Alert type="info">📊 Enter each team member's Conversion Lab score. Auto-converted to workshop points.</Alert>
-        <SimInputs values={simVals} onChange={handleSim} memberCount={team?.members.length || 5} />
-        {sim2 && sim2.average !== null && (
-          <div className="alert-success mt-3">Average: <strong>{sim2.average.toFixed(1)}</strong> → <strong>{sim2.points} workshop points</strong></div>
-        )}
-      </ActivityCard>
-    </div>
+</div>
   )
 }
