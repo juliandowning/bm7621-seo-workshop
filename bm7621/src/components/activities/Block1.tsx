@@ -19,20 +19,62 @@ export function Block1Panel() {
   const [lt1, setLt1] = useState(responses.a1_lt1 || '')
   const [lt2, setLt2] = useState(responses.a1_lt2 || '')
 
+  // Option C scoring rules
+  const BRAND_NAMES = ['asos', 'ryanair', 'starbucks', 'coca-cola', 'coca cola', 'samsung']
+  const LONG_TAIL_MODIFIERS = [
+    'best', 'cheap', 'affordable', 'free', 'near me', 'online', 'uk', 'london',
+    'how to', 'how do', 'what is', 'where to', 'when to', 'why', 'which',
+    'for', 'with', 'without', 'vs', 'versus', 'alternative', 'review',
+    'buy', 'order', 'shop', 'price', 'cost', 'deal', 'sale', 'discount',
+    'men', 'women', 'kids', 'adult', 'size', 'colour', 'black', 'white', 'red',
+    'good', 'top', 'rated', 'recommended', 'popular', '2024', '2025',
+  ]
+
+  const scoreShortTail = (kw: string): { pts: number; reason: string } => {
+    const w = kw.trim().toLowerCase()
+    if (!w) return { pts: 0, reason: 'Empty' }
+    const words = w.split(/\s+/)
+    if (words.length > 2) return { pts: 0, reason: 'Too many words for short-tail (max 2)' }
+    if (BRAND_NAMES.includes(w)) return { pts: 0, reason: 'Brand name alone is not a keyword' }
+    return { pts: 1, reason: 'Valid short-tail keyword' }
+  }
+
+  const scoreLongTail = (kw: string): { pts: number; reason: string } => {
+    const w = kw.trim().toLowerCase()
+    if (!w) return { pts: 0, reason: 'Empty' }
+    const words = w.split(/\s+/)
+    if (words.length < 3) return { pts: 0, reason: 'Long-tail needs 3+ words' }
+    const brandOnly = BRAND_NAMES.some(b => w === b || w.startsWith(b + ' ') && words.length === 2)
+    if (brandOnly) return { pts: 0, reason: 'Too generic — add a modifier' }
+    const hasModifier = LONG_TAIL_MODIFIERS.some(m => w.includes(m))
+    if (!hasModifier) return { pts: 1, reason: 'Valid long-tail, but add a modifier for maximum specificity' }
+    return { pts: 2, reason: 'Strong long-tail keyword with modifier' }
+  }
+
   const submitA1 = () => {
     if (a1Locked) return
-    let pts = 0
-    if (st1.trim()) pts++
-    if (st2.trim()) pts++
-    if (lt1.trim() && lt1.trim().split(' ').length >= 3) pts += 1.5
-    if (lt2.trim() && lt2.trim().split(' ').length >= 3) pts += 1.5
-    pts = Math.min(5, Math.round(pts))
-    const cPts = Math.min(2, Math.round(pts * 0.4))
-    const qPts = Math.min(3, pts - cPts)
-    updateScore('a1', pts, 5, cPts, qPts)
+    const s1 = scoreShortTail(st1)
+    const s2 = scoreShortTail(st2)
+    const l1 = scoreLongTail(lt1)
+    const l2 = scoreLongTail(lt2)
+    const raw = s1.pts + s2.pts + l1.pts + l2.pts
+    const pts = Math.min(5, raw)
+    const cPts = (s1.pts > 0 || s2.pts > 0) && (l1.pts > 0 || l2.pts > 0) ? 2 : pts > 0 ? 1 : 0
+    const qPts = Math.min(3, pts - cPts + (l1.pts === 2 || l2.pts === 2 ? 1 : 0))
+    const finalPts = Math.min(5, cPts + Math.min(3, qPts))
+    updateScore('a1', finalPts, 5, cPts, Math.min(3, qPts))
     updateResponse({ a1_st1: st1, a1_st2: st2, a1_lt1: lt1, a1_lt2: lt2, locked_a1: true })
     lockActivity('a1')
+    setA1Feedback({ s1, s2, l1, l2, pts: finalPts })
   }
+
+  const [a1Feedback, setA1Feedback] = useState<{
+    s1: { pts: number; reason: string }
+    s2: { pts: number; reason: string }
+    l1: { pts: number; reason: string }
+    l2: { pts: number; reason: string }
+    pts: number
+  } | null>(null)
 
   // A2 — lock+feedback
   const a2Locked = !!responses.locked_a2
@@ -98,17 +140,36 @@ export function Block1Panel() {
           <button className="btn-success btn-sm mt-3" onClick={submitA1} disabled={!st1.trim() && !st2.trim()}>Submit Answers</button>
         )}
         {a1Locked && scores.a1 && (
-          <FeedbackPanel
-            score={scores.a1.points} max={5}
-            completionPts={scores.a1.completionPts} qualityPts={scores.a1.qualityPts}
-            why={`Short-tail keywords score 1pt each when entered. Long-tail keywords score 1.5pts each when 3+ words are used. You earn more by thinking like a customer with specific intent rather than generic terms.`}
-            example={`Short-tail: "${examples.short[0]}", "${examples.short[1]}" · Long-tail: "${examples.long[0]}", "${examples.long[1]}"`}
-            keyLearning={[
-              'Short-tail keywords have high volume but high competition — hard to rank for.',
-              'Long-tail keywords are more specific, lower competition, and convert better.',
-              'Always think about what a customer is actually typing into Google, not what you call your product internally.',
-            ]}
-          />
+          <>
+            {a1Feedback && (
+              <div className="mt-3 space-y-1.5">
+                {[
+                  { label: `Short-tail 1: "${st1}"`, ...a1Feedback.s1 },
+                  { label: `Short-tail 2: "${st2}"`, ...a1Feedback.s2 },
+                  { label: `Long-tail 1: "${lt1}"`, ...a1Feedback.l1 },
+                  { label: `Long-tail 2: "${lt2}"`, ...a1Feedback.l2 },
+                ].map((row, i) => (
+                  <div key={i} className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${row.pts > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                    <span className="font-bold">{row.pts > 0 ? `+${row.pts}` : '0'}</span>
+                    <span className="font-mono truncate max-w-40">{row.label}</span>
+                    <span className="text-slate-500 ml-auto">{row.reason}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <FeedbackPanel
+              score={scores.a1.points} max={5}
+              completionPts={scores.a1.completionPts} qualityPts={scores.a1.qualityPts}
+              why="Short-tail (1–2 words, not just the brand name) = 1pt each. Long-tail (3+ words with a modifier like 'best', 'how to', 'cheap', 'for women') = 2pts each. Long-tail without a modifier = 1pt."
+              example={`Short-tail: "${examples.short[0]}", "${examples.short[1]}" · Long-tail: "${examples.long[0]}", "${examples.long[1]}"`}
+              keyLearning={[
+                'Short-tail keywords have high volume but high competition — hard to rank for.',
+                'Long-tail keywords with modifiers show specific intent and convert better.',
+                'Modifiers (best, cheap, how to, for, near me) are what separates a keyword from a topic.',
+                'Always think about what a customer is actually typing — not what you call your product internally.',
+              ]}
+            />
+          </>
         )}
       </ActivityCard>
 
