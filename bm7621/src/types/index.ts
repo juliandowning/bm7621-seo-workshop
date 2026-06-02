@@ -57,6 +57,7 @@ export interface ResponseMap {
   locked_a11?: boolean; locked_a12?: boolean; locked_a12b?: boolean; locked_a13?: boolean
   locked_a15?: boolean
   locked_a16?: boolean; locked_a17?: boolean; locked_a18?: boolean
+  sm_locked?: boolean
 }
 
 export interface SimulatorEntry {
@@ -71,10 +72,27 @@ export interface CMOEvaluation {
   verdict: BoardVerdict; generated_at: string
 }
 
+// ─── SEARCH MASTERS ─────────────────────────────────────────
+export interface SearchMastersAnswer {
+  questionId: string
+  answer: string
+  correct: boolean
+  points: number
+  timeMs: number
+}
+
+export interface SearchMastersState {
+  answers: Record<string, SearchMastersAnswer>
+  totalScore: number
+  completed: boolean
+  completedAt: string | null
+}
+
 export interface WorkspaceState {
   team: Team | null; scores: ScoreMap; responses: ResponseMap
   simulators: SimulatorMap; cmoEval: CMOEvaluation | null
   syncStatus: 'idle' | 'saving' | 'saved' | 'error' | 'offline'; lastSaved: string | null
+  searchMasters: SearchMastersState | null
 }
 
 export interface TeamSummary {
