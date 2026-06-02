@@ -58,7 +58,7 @@ export const ACTIVITY_LABELS: Record<ActivityKey, string> = {
   sim5: 'Analytics Lab 2',
   a16: 'AI Visibility Audit',
   a17: 'AI vs Human Advantage',
-  a18: 'Board Decision Challenge',
+  a18: 'Search Masters Challenge',
 }
 
 export const BLOCK_STRUCTURE = [
@@ -68,7 +68,7 @@ export const BLOCK_STRUCTURE = [
   { id: 4, label: 'Content Optimisation', activities: ['a9', 'a8', 'a10b', 'sim1'] as ActivityKey[], color: 'blue' },
   { id: 5, label: 'Google Ads', activities: ['a11', 'a12', 'a12b', 'a13', 'sim3'] as ActivityKey[], color: 'amber' },
   { id: 6, label: 'Measurement', activities: ['sim4', 'a15', 'sim5'] as ActivityKey[], color: 'teal' },
-  { id: 7, label: 'AI & Strategy', activities: ['a16', 'a17', 'a18'] as ActivityKey[], color: 'purple' },
+  { id: 7, label: 'AI & Future Search', activities: ['a16', 'a17', 'a18'] as ActivityKey[], color: 'purple' },
 ]
 
 // ─── INTENT MAPPING ANSWER KEYS ──────────────────────────────
