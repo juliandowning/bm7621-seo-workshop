@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils'
 interface SidebarProps {
   currentPanel: string
   onNavigate: (panel: string) => void
+  onClose?: () => void
 }
 
 const SYNC_ICONS = {
@@ -16,7 +17,7 @@ const SYNC_ICONS = {
   offline: <WifiOff size={10} className="text-slate-500" />,
 }
 
-export function Sidebar({ currentPanel, onNavigate }: SidebarProps) {
+export function Sidebar({ currentPanel, onNavigate, onClose }: SidebarProps) {
   const { team, scores, simulators, syncStatus, lastSaved } = useWorkspaceStore()
   const totalPts = selectTotalScore(scores)
   const simPts = Object.values(simulators).reduce((s, v) => s + (v?.points || 0), 0)
@@ -29,10 +30,19 @@ export function Sidebar({ currentPanel, onNavigate }: SidebarProps) {
   return (
     <aside className="w-64 h-screen bg-slate-900 flex flex-col fixed top-0 left-0 z-50 overflow-y-auto">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/8">
-        <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">BM7621</div>
-        <div className="font-display text-white text-base leading-snug">SEO Workshop</div>
-        <div className="text-[10px] text-slate-500 mt-1">CIM Level 4 · Digital Marketing</div>
+      <div className="px-5 py-5 border-b border-white/8 flex items-start justify-between">
+        <div>
+          <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">BM7621</div>
+          <div className="font-display text-white text-base leading-snug">SEO Workshop</div>
+          <div className="text-[10px] text-slate-500 mt-1">CIM Level 4 · Digital Marketing</div>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors text-lg flex-shrink-0 mt-0.5"
+            aria-label="Close menu"
+          >✕</button>
+        )}
       </div>
 
       {/* Team info */}
