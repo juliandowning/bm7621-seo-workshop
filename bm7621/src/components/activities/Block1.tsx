@@ -91,7 +91,7 @@ export function Block1Panel() {
           <div>
             <label className="form-label">Long-Tail Keywords (3+ words)</label>
             <input className="form-input mb-2" placeholder="e.g. best running shoes for beginners" disabled={a1Locked} value={lt1} onChange={e => setLt1(e.target.value)} />
-            <input className="form-input" placeholder="e.g. how to choose the right laptop" disabled={a1Locked} value={lt2} onChange={e => setSt2(e.target.value)} />
+            <input className="form-input" placeholder="e.g. how to choose the right laptop" disabled={a1Locked} value={lt2} onChange={e => setLt2(e.target.value)} />
           </div>
         </div>
         {!a1Locked && (
