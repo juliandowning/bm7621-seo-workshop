@@ -3,12 +3,15 @@ import { ACTIVITY_LABELS, ACTIVITY_ORDER } from '../data/workshop'
 import { totalScore } from './utils'
 import { downloadFile } from './utils'
 
+import type { SearchMastersState } from '../types'
+
 interface ExportData {
   team: Team
   scores: ScoreMap
   responses: ResponseMap
   simulators: SimulatorMap
   cmoEval: CMOEvaluation | null
+  searchMasters?: SearchMastersState | null
 }
 
 // ─── WORKBOOK TEXT EXPORT ────────────────────────────────────
@@ -46,15 +49,18 @@ export function exportWorkbookText(data: ExportData) {
     }
   })
 
-  lines.push('', '─── CMO STRATEGY ──────────────────────────────────────────')
-  lines.push(`SEO Opportunity: ${responses.a18_seo_pick || '—'}`)
-  lines.push(`Technical Risk: ${responses.a18_ai_pick || '—'}`)
-  lines.push(`PPC Opportunity: ${responses.a18_ppc_pick || '—'}`)
-  lines.push(`AI Opportunity: ${responses.a18_ai_pick || '—'}`)
-  lines.push(`Recommendation 1: ${responses.a18_rationale || '—'}`)
-  lines.push(`Recommendation 2: ${responses.a18_goal_pick || '—'}`)
-  lines.push(`Recommendation 3: ${responses.a18_rationale || '—'}`)
-  lines.push(`Business Impact: ${responses.a18_rationale || '—'}`)
+  lines.push('', '─── SEARCH MASTERS CHALLENGE ─────────────────────────────')
+  if (data.searchMasters && data.searchMasters.totalScore > 0) {
+    const sm = data.searchMasters
+    const answered = Object.keys(sm.answers).length
+    const correct = Object.values(sm.answers).filter((a: {correct:boolean}) => a.correct).length
+    lines.push(`Quiz Score: ${sm.totalScore} points`)
+    lines.push(`Questions Answered: ${answered}/20`)
+    lines.push(`Correct Answers: ${correct}/${answered}`)
+    lines.push(`Status: ${sm.completed ? 'Complete' : 'In Progress'}`)
+  } else {
+    lines.push('Search Masters Challenge: Not attempted')
+  }
 
   if (cmoEval) {
     lines.push('', '─── BOARD EVALUATION ──────────────────────────────────────')
@@ -119,27 +125,23 @@ export function exportStrategyHTML(data: ExportData) {
 <h2>Executive Summary</h2>
 <p>Following a comprehensive 6-hour SEO workshop, this report presents our strategic recommendations for ${team.brand}'s search performance. Organic growth has stalled whilst paid search costs have increased. AI-powered search is reshaping how customers discover products. This strategy addresses immediate opportunities and long-term positioning across organic, technical, paid, and AI-driven search.</p>
 
-<h2>SEO Opportunity</h2>
-<p>${responses.a18_seo_pick || '—'}</p>
-
-<h2>Biggest Technical Risk</h2>
-<p>${responses.a18_ai_pick || '—'}</p>
-
-<h2>PPC Opportunity</h2>
-<p>${responses.a18_ppc_pick || '—'}</p>
-
-<h2>AI Search Opportunity</h2>
-<p>${responses.a18_ai_pick || '—'}</p>
-
-<h2>Top 3 Strategic Recommendations</h2>
-<div class="recs">
-  <div class="rec">1. ${responses.a18_rationale || '—'}</div>
-  <div class="rec">2. ${responses.a18_goal_pick || '—'}</div>
-  <div class="rec">3. ${responses.a18_rationale || '—'}</div>
+<h2>Search Masters Challenge</h2>
+${data.searchMasters && data.searchMasters.totalScore > 0 ? `
+<div style="background:#f8f9ff;border-left:4px solid #2c6fad;padding:16px 20px;border-radius:6px;margin-bottom:16px;">
+  <div style="font-size:1.5rem;font-weight:bold;color:#2c6fad;margin-bottom:8px;">${data.searchMasters.totalScore} points</div>
+  <div style="font-size:0.9rem;color:#64748b;">
+    ${Object.keys(data.searchMasters.answers).length}/20 questions answered · 
+    ${Object.values(data.searchMasters.answers).filter((a) => (a as {correct:boolean}).correct).length} correct
+    ${data.searchMasters.completed ? ' · Complete' : ' · In Progress'}
+  </div>
 </div>
-
-<h2>Expected Business Impact</h2>
-<p>${responses.a18_rationale || '—'}</p>
+<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+  <tr style="background:#f1f5f9;"><th style="text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;">Question</th><th style="padding:8px 10px;border-bottom:1px solid #e2e8f0;">Result</th><th style="padding:8px 10px;border-bottom:1px solid #e2e8f0;">Points</th></tr>
+  ${Object.entries(data.searchMasters.answers).map(([id, ans]) => {
+    const a = ans as {correct:boolean;points:number;answer:string}
+    return '<tr><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:0.78rem;">' + id + '</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;color:' + (a.correct?'#16a34a':'#dc2626') + '">' + (a.correct?'✓ Correct':'✗ Incorrect') + '</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:center;">' + a.points + '</td></tr>'
+  }).join('')}
+</table>` : '<p>Search Masters Challenge not yet attempted.</p>'}
 
 ${cmoEval ? `
 <h2>Board Evaluation</h2>
