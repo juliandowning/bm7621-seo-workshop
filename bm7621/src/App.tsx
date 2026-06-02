@@ -59,15 +59,25 @@ function WorkshopApp() {
 
   return (
     <div className="flex min-h-screen">
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-      <div className={`fixed top-0 left-0 h-full z-50 transform transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <Sidebar currentPanel={panel} onNavigate={navigate} />
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300 ${sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      {/* Sidebar */}
+      <div className={`fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <Sidebar currentPanel={panel} onNavigate={navigate} onClose={() => setSidebarOpen(false)} />
       </div>
       <div className="flex-1 md:ml-64">
+        {/* Mobile top bar */}
         <div className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
-          <button onClick={() => setSidebarOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 font-bold">☰</button>
+          <button
+            onClick={() => setSidebarOpen(s => !s)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700 text-lg"
+            aria-label="Toggle menu"
+          >
+            {sidebarOpen ? '✕' : '☰'}
+          </button>
           <div className="text-sm font-bold text-slate-900 truncate">{title}</div>
         </div>
         <div className="p-6 md:p-8 max-w-4xl">
