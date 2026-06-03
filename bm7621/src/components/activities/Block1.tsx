@@ -30,9 +30,15 @@ export function Block1Panel() {
     'good', 'top', 'rated', 'recommended', 'popular', '2024', '2025',
   ]
 
+  const isPlaceholder = (kw: string) => {
+    const w = kw.toLowerCase()
+    return w.includes('lorem') || w.includes('ipsum') || w.includes('dolor') || w.includes('consectetur')
+  }
+
   const scoreShortTail = (kw: string): { pts: number; reason: string } => {
     const w = kw.trim().toLowerCase()
     if (!w) return { pts: 0, reason: 'Empty' }
+    if (isPlaceholder(kw)) return { pts: 0, reason: 'Placeholder text — enter a real keyword' }
     const words = w.split(/\s+/)
     if (words.length > 2) return { pts: 0, reason: 'Too many words for short-tail (max 2)' }
     if (BRAND_NAMES.includes(w)) return { pts: 0, reason: 'Brand name alone is not a keyword' }
@@ -42,6 +48,7 @@ export function Block1Panel() {
   const scoreLongTail = (kw: string): { pts: number; reason: string } => {
     const w = kw.trim().toLowerCase()
     if (!w) return { pts: 0, reason: 'Empty' }
+    if (isPlaceholder(kw)) return { pts: 0, reason: 'Placeholder text — enter a real keyword' }
     const words = w.split(/\s+/)
     if (words.length < 3) return { pts: 0, reason: 'Long-tail needs 3+ words' }
     const brandOnly = BRAND_NAMES.some(b => w === b || w.startsWith(b + ' ') && words.length === 2)
