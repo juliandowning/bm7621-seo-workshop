@@ -23,13 +23,11 @@ export function Block2Panel() {
   const [kw, setKw] = useState(responses.a4_kw || '')
 
   // Quality check: does text contain meaningful SEO/marketing words?
-  const SEO_QUALITY_WORDS = ['shop', 'buy', 'free', 'delivery', 'order', 'sale', 'new', 'best', 'official',
-    'collection', 'style', 'fashion', 'flight', 'book', 'coffee', 'drink', 'phone', 'cola', 'deal',
-    'offer', 'price', 'save', 'fast', 'easy', 'quality', 'premium', 'explore', 'discover', 'get']
   const hasQualityContent = (text: string) => {
     const lower = text.toLowerCase()
-    if (lower.includes('lorem') || lower.includes('ipsum')) return false
-    return SEO_QUALITY_WORDS.some(w => lower.includes(w)) || text.length > 0
+    if (lower.includes('lorem') || lower.includes('ipsum') || lower.includes('dolor')) return false
+    // Must have at least 10 chars of real content (not just punctuation/spaces)
+    return text.replace(/[\s\W]/g, '').length >= 8
   }
 
   const scoreA4 = (t: string, m: string, k: string, lock = false) => {
