@@ -68,8 +68,8 @@ export function LeaderboardPanel() {
       setEntries(updated as LeaderboardEntry[])
     }
     loadAll()
-    const unsub = subscribeToAllWorkspaces(() => loadAll())
-    return unsub
+    const unsub = subscribeToAllWorkspaces(() => { loadAll() })
+    return () => { unsub() }
   }, [])
 
   const sorted = [...entries].sort((a, b) => b.score - a.score || b.completed - a.completed)
