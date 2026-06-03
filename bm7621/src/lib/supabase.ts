@@ -21,6 +21,15 @@ export async function getTeamByCode(code: string) {
   return data
 }
 
+export async function updateTeamMembers(teamId: string, members: { name: string; order: number }[]) {
+  if (!isSupabaseConfigured()) return false
+  const { error } = await supabase
+    .from('bm7621seo_teams')
+    .update({ members: members, updated_at: new Date().toISOString() })
+    .eq('id', teamId)
+  return !error
+}
+
 export async function upsertWorkspaceData(teamId: string, payload: {
   scores?: Record<string, unknown>
   responses?: Record<string, unknown>
