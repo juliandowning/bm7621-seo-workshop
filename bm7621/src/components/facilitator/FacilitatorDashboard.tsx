@@ -46,6 +46,7 @@ export function FacilitatorDashboard() {
 
   const refresh = async () => {
     const data = await getAllTeamsData()
+    console.log('[Facilitator] getAllTeamsData:', JSON.stringify(data?.map((d: {brand: string; bm7621seo_workspace_data?: unknown[]}) => ({brand: d.brand, hasWs: (d.bm7621seo_workspace_data?.length || 0) > 0}))))
     const updated = BRANDS.map(brand => {
       const raw = data?.find((r: { brand: string }) => r.brand === brand)
       if (!raw) return { brand, name: String(brand), score: 0, completed: 0, pct: 0, currentBlock: 1, lastUpdated: null }
