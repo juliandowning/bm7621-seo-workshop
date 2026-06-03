@@ -42,12 +42,15 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
       let team: Team | null = null
       let existingWorkspace: Record<string, unknown> | null = null
 
-      const demo = DEMO_TEAMS.find(t => t.code === trimmed)
-      if (demo) {
-        team = demo
-      } else if (isSupabaseConfigured()) {
+      if (isSupabaseConfigured()) {
         team = await getTeamByCode(trimmed) as Team | null
         if (team) existingWorkspace = await getWorkspaceData(team.id) as Record<string, unknown> | null
+      }
+
+      // Demo fallback only if Supabase not configured or lookup failed
+      if (!team) {
+        const demo = DEMO_TEAMS.find(t => t.code === trimmed)
+        if (demo) team = demo
       }
 
       if (!team) {
