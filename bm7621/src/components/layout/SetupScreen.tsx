@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { getTeamByCode, getWorkspaceData, isSupabaseConfigured } from '../../lib/supabase'
+import { getTeamByCode, getWorkspaceData, updateTeamMembers, isSupabaseConfigured } from '../../lib/supabase'
 import { useWorkspaceStore } from '../../store/workspace'
-import { WORKSHOP_CODES, BLOCK_STRUCTURE } from '../../data/workshop'
+import { WORKSHOP_CODES } from '../../data/workshop'
 import { currentBlock } from '../../lib/utils'
 import type { Team, ScoreMap, ResponseMap, SimulatorMap } from '../../types'
 
@@ -31,7 +31,6 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
   const [step, setStep] = useState<'code' | 'members'>('code')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [returning, setReturning] = useState(false) // true if existing workspace found
 
   const handleCode = async () => {
     const trimmed = code.toUpperCase().trim()
@@ -41,17 +40,14 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
     setLoading(true); setError('')
     try {
       let team: Team | null = null
-      let existingWorkspace: { scores?: unknown; responses?: unknown; simulators?: unknown; cmo_eval?: unknown } | null = null
+      let existingWorkspace: Record<string, unknown> | null = null
 
-      // Check demo teams first
       const demo = DEMO_TEAMS.find(t => t.code === trimmed)
       if (demo) {
         team = demo
       } else if (isSupabaseConfigured()) {
         team = await getTeamByCode(trimmed) as Team | null
-        if (team) {
-          existingWorkspace = await getWorkspaceData(team.id)
-        }
+        if (team) existingWorkspace = await getWorkspaceData(team.id) as Record<string, unknown> | null
       }
 
       if (!team) {
@@ -59,72 +55,56 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
         setLoading(false); return
       }
 
-      // If returning team with saved data — restore and go straight in
-      if (existingWorkspace && team) {
+      // Returning team — restore workspace and go straight in
+      if (existingWorkspace) {
         const ws = existingWorkspace as {
           scores?: ScoreMap; responses?: ResponseMap
           simulators?: Record<string, unknown>; cmo_eval?: unknown
         }
-
-        // Restore scores
-        if (ws.scores) {
-          Object.entries(ws.scores).forEach(([key, val]) => {
-            if (val) updateScore(key as Parameters<typeof updateScore>[0], val.points, val.max, val.completionPts, val.qualityPts)
-          })
-        }
-        // Restore responses (includes member names if stored)
+        if (ws.scores) Object.entries(ws.scores).forEach(([key, val]) => {
+          if (val) updateScore(key as Parameters<typeof updateScore>[0], val.points, val.max, val.completionPts, val.qualityPts)
+        })
         if (ws.responses) updateResponse(ws.responses as ResponseMap)
-        // Restore simulators
-        if (ws.simulators) {
-          Object.entries(ws.simulators).forEach(([key, val]) => {
-            if (val && typeof val === 'object' && 'scores' in val) {
-              updateSimulator(key, (val as { scores: (number | null)[] }).scores)
-            }
-          })
-        }
-        // Restore CMO eval
+        if (ws.simulators) Object.entries(ws.simulators).forEach(([key, val]) => {
+          if (val && typeof val === 'object' && 'scores' in val)
+            updateSimulator(key, (val as { scores: (number | null)[] }).scores)
+        })
         if (ws.cmo_eval) setCMOEval(ws.cmo_eval as Parameters<typeof setCMOEval>[0])
 
-        // Restore team with saved member names if present in responses
-        const savedMembers = (ws.responses as ResponseMap & { _members?: Team['members'] })?._members
-        const restoredTeam: Team = {
-          ...team,
-          members: savedMembers || team.members || [],
-        }
-        setTeam(restoredTeam)
-
-        // Navigate to last active block
+        // Members come from the teams table (already on the team object)
+        setTeam(team)
         const lastBlock = currentBlock(ws.scores as ScoreMap || {})
         setLoading(false)
         onComplete(lastBlock)
         return
       }
 
-      // New team — show members step
+      // New team — pre-fill members from teams table if any saved
       setSelectedTeam(team)
-      setReturning(false)
+      if (team.members?.length) {
+        const filled = ['', '', '', '', '']
+        team.members.forEach(m => { if (m.order >= 1 && m.order <= 5) filled[m.order - 1] = m.name })
+        setMembers(filled)
+      }
       setStep('members')
-    } catch (e) {
+    } catch {
       setError('Connection error. Please try again.')
     }
     setLoading(false)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedTeam) return
     const teamMembers = members
       .map((m, i) => ({ name: m.trim(), order: i + 1 }))
       .filter(m => m.name)
 
-    const updatedTeam: Team = {
-      ...selectedTeam,
-      members: teamMembers,
-    }
+    const updatedTeam: Team = { ...selectedTeam, members: teamMembers }
     setTeam(updatedTeam)
 
-    // Save members into responses so they persist to Supabase
-    if (teamMembers.length > 0) {
-      updateResponse({ _members: teamMembers } as Parameters<typeof updateResponse>[0])
+    // Save members to teams table immediately — not debounced
+    if (teamMembers.length > 0 && !selectedTeam.id.startsWith('demo-')) {
+      await updateTeamMembers(selectedTeam.id, teamMembers)
     }
 
     onComplete(1)
