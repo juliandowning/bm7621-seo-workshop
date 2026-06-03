@@ -90,10 +90,16 @@ function WorkshopApp({ initialPanel }: { initialPanel?: string }) {
             const next = num < 7 ? `block${num + 1}` : 'leaderboard'
             const prevLabel = num > 1 ? `Block ${num - 1}` : 'Mission Brief'
             const nextLabel = num < 7 ? `Block ${num + 1}` : 'Leaderboard'
+            const smComplete = num !== 7 || !!useWorkspaceStore.getState().searchMasters?.completed
             return (
-              <div className="flex justify-between mt-8 pt-4 border-t border-slate-200">
+              <div className="flex justify-between items-start mt-8 pt-4 border-t border-slate-200">
                 <button className="btn-secondary" onClick={() => navigate(prev)}>← {prevLabel}</button>
-                <button className="btn-primary" onClick={() => navigate(next)}>{nextLabel} →</button>
+                <div className="flex flex-col items-end gap-1">
+                  <button className="btn-primary" onClick={() => navigate(next)} disabled={!smComplete}>{nextLabel} →</button>
+                  {num === 7 && !smComplete && (
+                    <span className="text-xs text-amber-600">Complete the Search Masters Challenge first</span>
+                  )}
+                </div>
               </div>
             )
           })()}
