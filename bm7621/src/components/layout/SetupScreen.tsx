@@ -110,7 +110,9 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
 
     // Save members to teams table immediately — not debounced
     if (teamMembers.length > 0 && !selectedTeam.id.startsWith('demo-')) {
-      await updateTeamMembers(selectedTeam.id, teamMembers)
+      console.log('[handleSave] saving members to Supabase, teamId:', selectedTeam.id, teamMembers)
+      const result = await updateTeamMembers(selectedTeam.id, teamMembers)
+      console.log('[handleSave] updateTeamMembers result:', result)
     }
 
     onComplete(1)
