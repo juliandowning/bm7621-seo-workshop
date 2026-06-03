@@ -240,3 +240,60 @@ export function calcCompletionPts(fields: string[], minLen = 20): number {
   if (ratio >= 0.5) return 1
   return 0
 }
+
+// ─── PER-BRAND EXAMPLES ──────────────────────────────────────
+export const BRAND_EXAMPLES: Record<Brand, {
+  serpObservation: string
+  titleExample: string
+  metaExample: string
+  cwvIssue: string
+  eeatExample: string
+  topicCluster: string
+  searchAdExample: string
+}> = {
+  ASOS: {
+    serpObservation: 'ASOS dominates the SERP with Paid Ads at position 1, a Featured Snippet for styling queries, Shopping results for product searches, and People Also Ask capturing how-to intent. AI Overviews appear for fashion advice queries, reducing organic CTR on informational content.',
+    titleExample: 'ASOS | Women\'s & Men\'s Fashion | Free Delivery & Returns',
+    metaExample: 'Shop thousands of styles at ASOS. Free next-day delivery and free returns on every order. New arrivals daily across clothing, shoes, accessories and beauty.',
+    cwvIssue: 'LCP is the biggest issue for ASOS — high-resolution product imagery across category pages is the largest contentful element. Slow LCP directly impacts conversion rate; every 100ms delay reduces conversions by ~1%. With thousands of product images, optimising image delivery is the highest priority CWV fix.',
+    eeatExample: 'ASOS Experience: 4/5 — User-generated content, customer photos and verified purchase reviews demonstrate real experience. Expertise: 4/5 — Detailed size guides, style advice content and brand partnerships show category knowledge. Authority: 5/5 — Major press coverage, FTSE listing, millions of social followers. Trust: 4/5 — Clear returns policy, Trustpilot rating, secure checkout badge.',
+    topicCluster: 'Pillar: "The Complete ASOS Style Guide" · Supporting: "How to Find Your Perfect Fit Using the ASOS Size Guide", "ASOS New Arrivals: What\'s Trending This Season", "ASOS Sale Guide: How to Get the Best Deals" · Questions: "Does ASOS have free returns?", "What sizes does ASOS stock?", "How long does ASOS delivery take?"',
+    searchAdExample: 'H1: "ASOS | Official Store" | H2: "Free Delivery & Returns" | H3: "New Arrivals Daily" · D1: "Shop thousands of styles at ASOS. Free next-day delivery on orders. Easy free returns on every order, every time." · D2: "Women\'s, men\'s and everything in between. New drops daily across fashion, beauty and lifestyle. Shop now." · CTA: Shop Now',
+  },
+  Ryanair: {
+    serpObservation: 'Ryanair SERPs show heavy Paid Ad presence from competitors (easyJet, Wizz Air) alongside Ryanair\'s own brand ads. Flight comparison tools (Skyscanner, Kayak) dominate organic results for generic flight queries. People Also Ask captures policy questions. Ryanair\'s brand name queries return direct site links and Knowledge Panel.',
+    titleExample: 'Ryanair | Cheap Flights Across Europe | Book Now',
+    metaExample: 'Book cheap flights with Ryanair. Hundreds of routes across Europe from just £9.99. Fast online check-in, flexible fares and exclusive app deals available daily.',
+    cwvIssue: 'CLS is the biggest issue for Ryanair — the booking engine loads progressively with dynamic pricing elements shifting the layout as availability data loads. For a transactional site where conversion is everything, layout shifts during the booking flow cause user abandonment and directly lose revenue.',
+    eeatExample: 'Ryanair Experience: 5/5 — Millions of verified passenger reviews and flight data demonstrate scale of real experience. Expertise: 4/5 — Route guides, travel tips and destination content show aviation knowledge. Authority: 5/5 — Europe\'s largest airline by passenger volume, major press coverage, regulatory recognition. Trust: 3/5 — Mixed reviews on price transparency; opportunity to improve through clearer pricing communication.',
+    topicCluster: 'Pillar: "The Complete Guide to Flying Ryanair" · Supporting: "How to Avoid Ryanair Baggage Fees", "Ryanair Check-In Guide: Online, App and Airport", "Best Ryanair Routes From the UK" · Questions: "How early should I check in with Ryanair?", "What is Ryanair\'s baggage allowance?", "Can I change my Ryanair flight?"',
+    searchAdExample: 'H1: "Cheap Flights | Ryanair" | H2: "From £9.99 One Way" | H3: "Book Direct & Save" · D1: "Europe\'s favourite low-cost airline. Book direct for the cheapest fares. Hundreds of routes, daily departures, exclusive app deals." · D2: "Compare our routes and fares. Free check-in app, priority boarding available. Book now for your next European adventure." · CTA: Search Flights',
+  },
+  Starbucks: {
+    serpObservation: 'Starbucks SERPs show strong Local Pack presence with store locator results dominating local queries. Brand searches return Knowledge Panel with menu highlights. People Also Ask captures calorie and ingredient questions. AI Overviews appear for "how to make" queries. Competitor coffee brands bid on generic terms like "coffee near me".',
+    titleExample: 'Starbucks | Coffee, Drinks & More | Find Your Store',
+    metaExample: 'Discover the Starbucks menu — from handcrafted espresso drinks and Frappuccinos to teas, food and seasonal favourites. Order ahead on the app or find your nearest store.',
+    cwvIssue: 'LCP is the biggest issue for Starbucks — the store locator and seasonal product hero images are the largest contentful elements. During seasonal launches (Pumpkin Spice, Christmas), traffic spikes dramatically. Slow LCP at these peaks directly impacts mobile conversion and app downloads.',
+    eeatExample: 'Starbucks Experience: 5/5 — 35,000+ stores worldwide, billions of customer orders, and a rewards programme with 32M+ members demonstrate unmatched real-world experience. Expertise: 5/5 — Coffee sourcing content, barista training materials, and ethical sourcing reports demonstrate deep expertise. Authority: 5/5 — Global brand recognition, Fortune 500, major media coverage. Trust: 4/5 — Clear allergen information, ethical sourcing commitments, Trustpilot presence.',
+    topicCluster: 'Pillar: "The Complete Starbucks Drinks Guide" · Supporting: "Starbucks Secret Menu: Hidden Drinks Worth Ordering", "Starbucks Calories Guide: Every Drink Explained", "How to Order on the Starbucks App and Earn Stars" · Questions: "What is in a Starbucks Pumpkin Spice Latte?", "How many calories are in a Starbucks latte?", "Can I customise my Starbucks order?"',
+    searchAdExample: 'H1: "Starbucks | Order Your Way" | H2: "Earn Stars on Every Visit" | H3: "Seasonal Drinks Available Now" · D1: "Skip the queue — order ahead on the Starbucks app and collect your drink ready-made. Earn Stars towards free drinks with every purchase." · D2: "Handcrafted drinks made your way. Hot, iced or blended. Find your nearest store or order on the Starbucks app today." · CTA: Order Now',
+  },
+  'Coca-Cola': {
+    serpObservation: 'Coca-Cola brand SERPs are dominated by the Knowledge Panel, brand history content and official product pages. Generic queries like "cola drink" or "best cola" show competitor brands and comparison content. Shopping results appear for bulk purchase queries. AI Overviews capture health and ingredient questions, often showing independent sources over brand content.',
+    titleExample: 'Coca-Cola | The Original Taste | Explore Our Range',
+    metaExample: 'Discover the world of Coca-Cola. From the original Classic to Zero Sugar and the full Coke family. Find recipes, brand history and where to buy near you.',
+    cwvIssue: 'CLS is the biggest issue for Coca-Cola — the brand\'s content-heavy campaign pages load rich media assets progressively, causing significant layout shifts. As a brand whose digital presence is driven by campaign landing pages and storytelling content, CLS directly impacts engagement and time on site.',
+    eeatExample: 'Coca-Cola Experience: 5/5 — 130+ years of product history, global consumer data and brand heritage provide unmatched real-world experience signals. Expertise: 4/5 — Recipe content, brand history and sustainability reports demonstrate knowledge depth. Authority: 5/5 — One of the world\'s most recognised brands, Fortune 500, Wikipedia presence, global press coverage. Trust: 4/5 — Allergen and nutritional transparency, sustainability commitments, Clear ingredients labelling.',
+    topicCluster: 'Pillar: "The Complete Guide to Coca-Cola" · Supporting: "Coca-Cola vs Pepsi: The Full Taste Comparison", "Coca-Cola Zero Sugar vs Diet Coke: What\'s the Difference?", "Best Cocktails and Mixers Using Coca-Cola" · Questions: "How much sugar is in a can of Coke?", "Is Coca-Cola Zero Sugar really sugar free?", "What is the secret Coca-Cola recipe?"',
+    searchAdExample: 'H1: "Coca-Cola | Find Near You" | H2: "The Original Since 1886" | H3: "Zero Sugar Now Available" · D1: "Find Coca-Cola Classic, Zero Sugar and the full family in stores near you. Use our store locator or buy online in bulk for events and parties." · D2: "Taste the original. Explore the full Coca-Cola range including Classic, Zero Sugar, Diet and seasonal editions. Order online today." · CTA: Find a Store',
+  },
+  Samsung: {
+    serpObservation: 'Samsung SERPs show strong Shopping results for product queries, with comparison sites (Which?, TechRadar) dominating organic positions for "best Samsung phone" queries. Paid Ads from Samsung and retailers (Currys, Amazon) appear for transactional terms. People Also Ask captures spec comparison and how-to questions. AI Overviews appear for technical queries, often citing third-party review sites over Samsung.com.',
+    titleExample: 'Samsung UK | Galaxy Phones, TVs & More | Shop Now',
+    metaExample: 'Discover the latest Samsung Galaxy smartphones, QLED TVs, tablets and home appliances. Free delivery, trade-in offers and 0% finance available at Samsung.com.',
+    cwvIssue: 'LCP is the biggest issue for Samsung — product detail pages feature large, high-resolution product renders and 360-degree images. With customers comparing multiple high-value devices before purchase, slow LCP increases bounce rate at the most critical conversion point in the funnel.',
+    eeatExample: 'Samsung Experience: 5/5 — Real user reviews across millions of products, extensive community forums and verified purchase data demonstrate genuine experience at scale. Expertise: 5/5 — Technical spec sheets, developer documentation and innovation labs demonstrate deep technical expertise. Authority: 5/5 — Fortune Global 500, global press coverage, CES innovation awards, Wikipedia presence. Trust: 4/5 — Samsung Care warranty programme, clear returns policy, authorised service centres UK-wide.',
+    topicCluster: 'Pillar: "The Complete Samsung Galaxy Buying Guide" · Supporting: "Samsung Galaxy S vs A Series: Which Should You Buy?", "How to Transfer Data to a New Samsung Phone", "Samsung Trade-In Programme: Is It Worth It?" · Questions: "Which Samsung phone has the best camera?", "How do I back up my Samsung Galaxy?", "What is Samsung DeX and how does it work?"',
+    searchAdExample: 'H1: "Samsung Galaxy | Official UK" | H2: "Trade In & Save Up To £400" | H3: "Free Next-Day Delivery" · D1: "Shop the latest Samsung Galaxy smartphones direct from Samsung UK. Exclusive trade-in deals, 0% finance and free next-day delivery on every order." · D2: "Galaxy S25, Z Fold, tablets, wearables and more. Discover the full Samsung ecosystem and save with official bundle deals. Shop now." · CTA: Shop Galaxy',
+  },
+}
