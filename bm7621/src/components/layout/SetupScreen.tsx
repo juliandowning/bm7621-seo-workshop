@@ -55,31 +55,34 @@ export function SetupScreen({ onComplete, onFacilitator }: SetupScreenProps) {
         setLoading(false); return
       }
 
-      // Returning team — restore workspace and go straight in
-      if (existingWorkspace) {
-        const ws = existingWorkspace as {
-          scores?: ScoreMap; responses?: ResponseMap
-          simulators?: Record<string, unknown>; cmo_eval?: unknown
+      // Returning team — has saved members on teams table = skip members screen
+      if (team.members && team.members.length > 0 && !team.id.startsWith('demo-')) {
+        // Restore workspace data if it exists
+        if (existingWorkspace) {
+          const ws = existingWorkspace as {
+            scores?: ScoreMap; responses?: ResponseMap
+            simulators?: Record<string, unknown>; cmo_eval?: unknown
+          }
+          if (ws.scores) Object.entries(ws.scores).forEach(([key, val]) => {
+            if (val) updateScore(key as Parameters<typeof updateScore>[0], val.points, val.max, val.completionPts, val.qualityPts)
+          })
+          if (ws.responses) updateResponse(ws.responses as ResponseMap)
+          if (ws.simulators) Object.entries(ws.simulators).forEach(([key, val]) => {
+            if (val && typeof val === 'object' && 'scores' in val)
+              updateSimulator(key, (val as { scores: (number | null)[] }).scores)
+          })
+          if (ws.cmo_eval) setCMOEval(ws.cmo_eval as Parameters<typeof setCMOEval>[0])
         }
-        if (ws.scores) Object.entries(ws.scores).forEach(([key, val]) => {
-          if (val) updateScore(key as Parameters<typeof updateScore>[0], val.points, val.max, val.completionPts, val.qualityPts)
-        })
-        if (ws.responses) updateResponse(ws.responses as ResponseMap)
-        if (ws.simulators) Object.entries(ws.simulators).forEach(([key, val]) => {
-          if (val && typeof val === 'object' && 'scores' in val)
-            updateSimulator(key, (val as { scores: (number | null)[] }).scores)
-        })
-        if (ws.cmo_eval) setCMOEval(ws.cmo_eval as Parameters<typeof setCMOEval>[0])
-
-        // Members come from the teams table (already on the team object)
         setTeam(team)
-        const lastBlock = currentBlock(ws.scores as ScoreMap || {})
+        const lastBlock = existingWorkspace
+          ? currentBlock((existingWorkspace as { scores?: ScoreMap }).scores || {})
+          : 1
         setLoading(false)
         onComplete(lastBlock)
         return
       }
 
-      // New team — pre-fill members from teams table if any saved
+      // New team (no members yet) — show members screen
       setSelectedTeam(team)
       if (team.members?.length) {
         const filled = ['', '', '', '', '']
