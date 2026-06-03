@@ -15,7 +15,7 @@ export async function getTeamByCode(code: string) {
     .from('bm7621seo_teams')
     .select('*')
     .eq('code', code.toUpperCase().trim())
-    .single()
+    .maybeSingle()
   if (error) return null
   return data
 }
@@ -51,7 +51,7 @@ export async function getWorkspaceData(teamId: string) {
     .from('bm7621seo_workspace_data')
     .select('*')
     .eq('team_id', teamId)
-    .single()
+    .maybeSingle()
   if (error) return null
   return data
 }
