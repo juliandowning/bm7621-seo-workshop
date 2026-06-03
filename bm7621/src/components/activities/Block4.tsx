@@ -57,16 +57,27 @@ export function Block4Panel() {
   const submitA9 = () => {
     if (a9Locked) return
     const ratingsFilled = Object.values(eeatRatings).filter(v => v > 0).length
-    const notesFilled = Object.values(eeatNotes).filter(v => v.length > 20).length
+    const notesValues = Object.values(eeatNotes)
+    const notesFilled = notesValues.filter(v => {
+      if (!v || v.length < 20) return false
+      if (v.toLowerCase().includes('lorem') || v.toLowerCase().includes('ipsum')) return false
+      // Must contain some specific signal words, not just generic filler
+      const signalWords = ['because', 'has', 'include', 'show', 'demonstrate', 'award', 'review',
+        'press', 'certif', 'partner', 'research', 'data', 'expert', 'trust', 'policy', 'secure',
+        'return', 'transparent', 'coverage', 'mention', 'backlink', 'wikipedia', 'recogni']
+      return signalWords.some(w => v.toLowerCase().includes(w)) || v.length >= 60
+    }).length
     const cPts = ratingsFilled >= 4 ? 2 : ratingsFilled >= 2 ? 1 : 0
     const qPts = Math.min(3, notesFilled)
     updateScore('a9', cPts + qPts, 5, cPts, qPts)
     updateResponse({ ...eeatRatings, ...eeatNotes, locked_a9: true })
     lockActivity('a9')
-    const why = qPts >= 3 ? 'All four E-E-A-T dimensions explained with specific evidence.' :
-      qPts === 2 ? 'Good — two or three notes have specific evidence. Add more detail on the remaining dimensions.' :
-      qPts === 1 ? 'Only one note has sufficient detail. Each E-E-A-T note should name specific signals (e.g. press coverage, certifications, review platforms).' :
-      'Notes are too brief. For each dimension, describe specific evidence — what does your brand actually do to demonstrate this signal?'
+    const hasLorem = notesValues.some(v => v.toLowerCase().includes('lorem'))
+    const why = hasLorem ? 'Placeholder text scores 0 for quality. Write genuine observations about your brand E-E-A-T signals.' :
+      qPts >= 3 ? 'All four E-E-A-T dimensions explained with specific evidence.' :
+      qPts === 2 ? 'Good — some notes have specific evidence. Add specific signals for the remaining dimensions (e.g. press coverage, certifications, review platforms).' :
+      qPts === 1 ? 'Notes are too brief or generic. Name specific evidence — what does your brand actually do to demonstrate each signal?' :
+      'Notes need specific evidence. For each dimension, describe concrete signals not generic statements.'
     setA9Fb({ cPts, qPts, why })
   }
 

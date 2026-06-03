@@ -30,19 +30,28 @@ export function Block3Panel() {
 
   const submitA6 = () => {
     if (a6Locked) return
+    const isLorem = explain.toLowerCase().includes('lorem') || explain.toLowerCase().includes('ipsum')
+    const hasDepth = explain.length >= 80 && !isLorem
+    const hasMention = explain.toLowerCase().includes(brand.toLowerCase()) ||
+      explain.toLowerCase().includes('page') || explain.toLowerCase().includes('image') ||
+      explain.toLowerCase().includes('load') || explain.toLowerCase().includes('user') ||
+      explain.toLowerCase().includes('mobile') || explain.toLowerCase().includes('speed') ||
+      explain.toLowerCase().includes('shift') || explain.toLowerCase().includes('click') ||
+      explain.toLowerCase().includes('bounce') || explain.toLowerCase().includes('customer')
     let pts = 0
     if (cwv) pts += 2
-    if (explain.length >= 50) pts += 2
-    if (explain.length >= 150) pts++
-    const cPts = cwv && explain.length >= 50 ? 2 : cwv || explain.length > 0 ? 1 : 0
+    if (explain.length >= 50 && !isLorem) pts += 2
+    if (hasDepth && hasMention) pts++
+    const cPts = cwv && explain.length >= 50 && !isLorem ? 2 : cwv ? 1 : 0
     const qPts = Math.min(3, pts - cPts)
     updateScore('a6', Math.min(5, pts), 5, cPts, qPts)
     updateResponse({ a6_cwv: cwv, a6_explain: explain, locked_a6: true })
     lockActivity('a6')
-    const why = qPts >= 3 ? 'Excellent — clear CWV selection with a detailed explanation.' :
-      qPts === 2 ? 'Good explanation. Add more detail on the specific business impact for full marks.' :
-      qPts === 1 ? 'Basic explanation. Describe specifically what causes this CWV issue and how to fix it.' :
-      'Explanation too short. Write at least 50 characters explaining why this CWV matters for your brand.'
+    const why = isLorem ? 'Placeholder text scores 0. Write a genuine explanation of why this CWV matters for your brand.' :
+      qPts >= 3 ? 'Excellent — specific explanation with clear business context.' :
+      qPts === 2 ? 'Good. Add specific details about how this CWV affects your brand users or business metrics.' :
+      qPts === 1 ? 'Explain what specifically causes this issue and the user/business impact for your brand.' :
+      'Too short or too generic. Write at least 50 chars with brand-specific context.'
     setA6Fb({ cPts, qPts, why })
   }
 

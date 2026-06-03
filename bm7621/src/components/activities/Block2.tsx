@@ -22,22 +22,36 @@ export function Block2Panel() {
   const [meta, setMeta] = useState(responses.a4_meta || '')
   const [kw, setKw] = useState(responses.a4_kw || '')
 
+  // Quality check: does text contain meaningful SEO/marketing words?
+  const SEO_QUALITY_WORDS = ['shop', 'buy', 'free', 'delivery', 'order', 'sale', 'new', 'best', 'official',
+    'collection', 'style', 'fashion', 'flight', 'book', 'coffee', 'drink', 'phone', 'cola', 'deal',
+    'offer', 'price', 'save', 'fast', 'easy', 'quality', 'premium', 'explore', 'discover', 'get']
+  const hasQualityContent = (text: string) => {
+    const lower = text.toLowerCase()
+    if (lower.includes('lorem') || lower.includes('ipsum')) return false
+    return SEO_QUALITY_WORDS.some(w => lower.includes(w)) || text.length > 0
+  }
+
   const scoreA4 = (t: string, m: string, k: string, lock = false) => {
     let pts = 0
     const tOk = t.length >= 30 && t.length <= 60
     const mOk = m.length >= 120 && m.length <= 160
-    if (tOk) pts += 2; else if (t.length > 0) pts++
-    if (mOk) pts += 2; else if (m.length > 0) pts++
-    if (k.trim()) pts++
+    const tQuality = hasQualityContent(t)
+    const mQuality = hasQualityContent(m)
+    if (tOk && tQuality) pts += 2; else if (t.length > 0 && tQuality) pts++
+    if (mOk && mQuality) pts += 2; else if (m.length > 0 && mQuality) pts++
+    if (k.trim() && hasQualityContent(k)) pts++
     const cPts = (t.trim() && m.trim() && k.trim()) ? 2 : (t.trim() || m.trim()) ? 1 : 0
     const qPts = Math.min(3, pts - cPts)
     updateScore('a4', Math.min(5, pts), 5, cPts, qPts)
     updateResponse({ a4_title: t, a4_meta: m, a4_kw: k, ...(lock ? { locked_a4: true } : {}) })
     if (lock) {
       lockActivity('a4')
-      const why = (tOk && mOk) ? 'Title and meta description both within optimal character ranges — strong Quality Score signals.' :
-        !tOk ? `Title is ${t.length} chars (target 30–60). ${t.length > 60 ? 'Shorten it — Google will truncate.' : 'Expand it to include more keywords and a CTA.'}` :
-        `Meta is ${m.length} chars (target 120–160). ${m.length > 160 ? 'Shorten — Google will rewrite it.' : 'Expand to fill the available space with a compelling description.'}`
+      const lorem = t.toLowerCase().includes('lorem') || m.toLowerCase().includes('lorem')
+      const why = lorem ? 'Content must be genuine — placeholder text scores 0 for quality. Write a real title and meta description for your brand.' :
+        (tOk && mOk && tQuality && mQuality) ? 'Title and meta description both within optimal character ranges with relevant content.' :
+        !tOk ? `Title is ${t.length} chars (target 30–60). ${t.length > 60 ? 'Shorten it.' : 'Expand it to include keywords and a CTA.'}` :
+        `Meta is ${m.length} chars (target 120–160). ${m.length > 160 ? 'Shorten — Google will rewrite it.' : 'Expand with a compelling description.'}`
       setA4Fb({ cPts, qPts, why })
     }
   }

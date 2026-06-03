@@ -249,7 +249,11 @@ export function Block5Panel() {
           value={rationale} onChange={e => setRationale(e.target.value)} />
         <CharCount value={rationale} min={50} max={250} />
         {!a13Locked && (
-          <button className="btn-success btn-sm mt-3" onClick={submitA13} disabled={total !== 10000 || rationale.length < 50}>Submit Answers</button>
+          <div className="mt-3">
+            <button className="btn-success btn-sm" onClick={submitA13} disabled={total !== 10000 || rationale.length < 50}>Submit Answers</button>
+            {total !== 10000 && <div className="text-xs text-amber-600 mt-1.5">Budget must total exactly £10,000 before submitting (currently £{total.toLocaleString()})</div>}
+            {total === 10000 && rationale.length < 50 && <div className="text-xs text-amber-600 mt-1.5">Add your budget rationale (min 50 chars) before submitting</div>}
+          </div>
         )}
         {a13Locked && a13Fb && <QualityFeedback completionPts={a13Fb.cPts} qualityPts={a13Fb.qPts} qualityReason={a13Fb.why} />}
         {a13Locked && scores.a13 && (
