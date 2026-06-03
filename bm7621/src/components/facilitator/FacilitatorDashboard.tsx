@@ -21,7 +21,7 @@ function computeRow(raw: { brand: Brand; name: string; bm7621seo_workspace_data?
   const score = Object.values(sc).reduce((s: number, v) => s + (v?.points || 0), 0)
     + Object.values(sim).reduce((s: number, v) => s + (v?.points || 0), 0)
   const completed = Object.values(sc).filter(v => v?.completed).length
-  const pct = Math.round((completed / 23) * 100)
+  const pct = Math.round((completed / 22) * 100)
 
   // determine current block
   let currentBlock = 1
@@ -46,10 +46,9 @@ export function FacilitatorDashboard() {
 
   const refresh = async () => {
     const data = await getAllTeamsData()
-    if (!data?.length) return
     const updated = BRANDS.map(brand => {
-      const raw = data.find((r: { brand: string }) => r.brand === brand)
-      if (!raw) return { brand, name: brand as string, score: 0, completed: 0, pct: 0, currentBlock: 1, lastUpdated: null }
+      const raw = data?.find((r: { brand: string }) => r.brand === brand)
+      if (!raw) return { brand, name: String(brand), score: 0, completed: 0, pct: 0, currentBlock: 1, lastUpdated: null }
       return computeRow(raw as Parameters<typeof computeRow>[0])
     })
     setRows(updated as TeamRow[])
