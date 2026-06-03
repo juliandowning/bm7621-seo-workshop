@@ -23,10 +23,12 @@ export async function getTeamByCode(code: string) {
 
 export async function updateTeamMembers(teamId: string, members: { name: string; order: number }[]) {
   if (!isSupabaseConfigured()) return false
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('bm7621seo_teams')
-    .update({ members: members, updated_at: new Date().toISOString() })
+    .update({ members: members })
     .eq('id', teamId)
+    .select()
+  console.log('[updateTeamMembers] teamId:', teamId, 'members:', members, 'result:', data, 'error:', error)
   return !error
 }
 
