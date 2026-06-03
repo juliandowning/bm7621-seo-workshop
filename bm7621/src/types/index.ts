@@ -58,6 +58,7 @@ export interface ResponseMap {
   locked_a15?: boolean
   locked_a16?: boolean; locked_a17?: boolean; locked_a18?: boolean
   sm_locked?: boolean
+  _members?: { name: string; order: number }[]
 }
 
 export interface SimulatorEntry {
