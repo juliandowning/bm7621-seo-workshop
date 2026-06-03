@@ -57,20 +57,23 @@ export async function getWorkspaceData(teamId: string) {
 }
 
 export async function getAllTeamsData() {
-  const { data, error } = await supabase
+  // Fetch teams and workspace data separately to avoid join issues
+  const { data: teams, error: teamsError } = await supabase
     .from('bm7621seo_teams')
-    .select(`
-      *,
-      bm7621seo_workspace_data (
-        scores,
-        responses,
-        simulators,
-        cmo_eval,
-        updated_at
-      )
-    `)
-  if (error) return []
-  return data || []
+    .select('*')
+  if (teamsError || !teams) return []
+
+  const { data: workspaces } = await supabase
+    .from('bm7621seo_workspace_data')
+    .select('*')
+
+  // Merge workspace data onto teams
+  return teams.map((team: { id: string; brand: string; name: string; members: unknown }) => ({
+    ...team,
+    bm7621seo_workspace_data: workspaces
+      ? workspaces.filter((ws: { team_id: string }) => ws.team_id === team.id)
+      : [],
+  }))
 }
 
 export function subscribeToAllWorkspaces(callback: (payload: unknown) => void) {
