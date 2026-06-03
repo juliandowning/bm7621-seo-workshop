@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { TECH_MATRIX_CORRECT, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
+import { TECH_MATRIX_CORRECT, BRAND_EXAMPLES, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel, QualityFeedback } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
@@ -21,6 +21,7 @@ const MATRIX_ITEMS = {
 export function Block3Panel() {
   const { team, scores, responses, simulators, updateScore, updateResponse, updateSimulator, lockActivity } = useWorkspaceStore()
   const brand = team?.brand || 'ASOS'
+  const brandEx = BRAND_EXAMPLES[brand as keyof typeof BRAND_EXAMPLES] || BRAND_EXAMPLES['ASOS']
 
   // A6 — lock+feedback
   const a6Locked = !!responses.locked_a6
@@ -123,7 +124,7 @@ export function Block3Panel() {
           <FeedbackPanel
             score={scores.a6.points} max={5}
             why={`Selecting a CWV = 2pts. Explanation ≥50 chars = 2pts, ≥150 chars = full marks. You selected ${cwv}.`}
-            example="For a retail brand like ASOS, LCP is typically the biggest issue. Product images are the largest contentful elements and slow loading directly impacts conversion rate. Google's research shows that every 100ms improvement in LCP increases conversion by 1.3%. LCP also has the highest weighting in the Core Web Vitals ranking signal."
+            example={brandEx.cwvIssue}
             keyLearning={[
               'LCP measures how fast the largest visible element loads — typically a hero image or heading.',
               'CLS causes elements to shift as a page loads — jarring UX that particularly affects mobile checkout.',

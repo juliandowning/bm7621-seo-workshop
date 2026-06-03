@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { A11_ANSWERS, NEG_KW_CORRECT, NEG_KW_ALL, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
+import { A11_ANSWERS, NEG_KW_CORRECT, NEG_KW_ALL, QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, BRAND_EXAMPLES, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { ActivityCard, Alert, SimInputs, CharCount, LockedBadge, FeedbackPanel, QualityFeedback } from '../ui/shared'
 import { cn } from '../../lib/utils'
 
@@ -17,6 +17,7 @@ const ADS_LABELS: Record<string, string> = { Serve: 'Serve', Limited: 'Serve Wit
 export function Block5Panel() {
   const { team, scores, responses, simulators, updateScore, updateResponse, updateSimulator, lockActivity } = useWorkspaceStore()
   const brand = team?.brand || 'ASOS'
+  const brandEx = BRAND_EXAMPLES[brand as keyof typeof BRAND_EXAMPLES] || BRAND_EXAMPLES['ASOS']
 
   // A12 — Will Ads Serve (lock+feedback)
   const a11Locked = !!responses.locked_a11
@@ -219,7 +220,7 @@ export function Block5Panel() {
             {ad.cta && <div className="text-xs text-brand-600 font-semibold mt-1">{ad.cta} →</div>}
           </div>
         )}
-        {scores.a12b && <FeedbackPanel score={scores.a12b.points} max={5} why="Completion: all fields filled = 2pts. Quality: use of keyword, benefit, CTA vocabulary in combined ad text increases quality score (max 3pts)." example={`H1: "${brand} Official Store" | H2: "Free Next-Day Delivery" | H3: "Shop the Latest Collection" · D1: "Explore thousands of styles across clothing, shoes and accessories. Free returns on every order." · D2: "Join millions of ${brand} shoppers. Exclusive member offers and new drops every week." · CTA: Shop Now`} keyLearning={['Headlines are the most important element — lead with keyword and primary benefit.', 'Each headline appears in different combinations — make sure all three work independently.', 'Descriptions should expand on the headline benefit and address a potential objection.', 'A clear CTA in descriptions (not just extensions) improves CTR.']} />}
+        {scores.a12b && <FeedbackPanel score={scores.a12b.points} max={5} why="Completion: all fields filled = 2pts. Quality: use of keyword, benefit, CTA vocabulary in combined ad text increases quality score (max 3pts)." example={brandEx.searchAdExample} keyLearning={['Headlines are the most important element — lead with keyword and primary benefit.', 'Each headline appears in different combinations — make sure all three work independently.', 'Descriptions should expand on the headline benefit and address a potential objection.', 'A clear CTA in descriptions (not just extensions) improves CTR.']} />}
       </ActivityCard>
       {/* A15 — Budget */}
       <ActivityCard number={N.a13} title="Budget Allocation Challenge" subtitle="Allocate exactly £10,000 across campaign types" points={scores.a13?.points || 0}>

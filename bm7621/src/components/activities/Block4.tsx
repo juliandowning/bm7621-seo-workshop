@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
+import { QUALITY_KEYWORDS, calcQualityPts, calcCompletionPts, BRAND_EXAMPLES, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { ActivityCard, Alert, CharCount, FeedbackPanel, LockedBadge, ScoreBreakdown, SimInputs, QualityFeedback } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -41,6 +41,7 @@ In summary, getting traffic is important and you should try different things to 
 export function Block4Panel() {
   const { team, scores, responses, simulators, updateScore, updateResponse, updateSimulator, lockActivity } = useWorkspaceStore()
   const brand = team?.brand || 'ASOS'
+  const brandEx = BRAND_EXAMPLES[brand as keyof typeof BRAND_EXAMPLES] || BRAND_EXAMPLES['ASOS']
 
   // A8 — E-E-A-T (displayed as A8)
   const a9Locked = !!responses.locked_a9
@@ -154,7 +155,7 @@ export function Block4Panel() {
             score={scores.a9.points} max={5}
             completionPts={scores.a9.completionPts} qualityPts={scores.a9.qualityPts}
             why="Completion: all 4 dimensions rated = 2pts. Quality: each note with 20+ chars = 1pt each (max 3). Strong answers explain specific evidence for each dimension."
-            example={`${brand} Experience: 4/5 — Product reviews, user-generated content and social proof demonstrate real customer experience. ${brand} Expertise: 4/5 — Category-specific buying guides and detailed product descriptions show category knowledge. Authority: 5/5 — Major press coverage, fashion industry awards and brand partnerships. Trust: 4/5 — Clear returns policy, secure checkout badge, verified reviews platform.`}
+            example={brandEx.eeatExample}
             keyLearning={[
               'E-E-A-T (Experience, Expertise, Authority, Trust) is Google\'s framework for evaluating content quality.',
               'Experience (the first E) was added in 2022 — content must demonstrate real first-hand experience.',
@@ -197,7 +198,7 @@ export function Block4Panel() {
           <FeedbackPanel
             score={scores.a8.points} max={5}
             why="Points awarded for completion across all fields. A complete cluster (pillar + 3 supporting + 3 questions) = maximum score."
-            example={`Pillar: "The Complete Guide to Sustainable Fashion" · Supporting: "How to Care for Your Clothes to Make Them Last Longer", "Second-Hand vs New: The Environmental Impact", "The Best Eco-Friendly Fabrics Explained" · Questions: "Which brands are genuinely sustainable?", "How do I know if fast fashion is bad?", "What does carbon-neutral clothing actually mean?"`}
+            example={brandEx.topicCluster}
             keyLearning={[
               'Topic clusters tell Google you have comprehensive, authoritative coverage of a subject.',
               'The pillar page targets a broad keyword — supporting articles target specific long-tail variations.',

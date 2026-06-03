@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { CTR_ANSWERS, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
+import { CTR_ANSWERS, BRAND_EXAMPLES, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { ActivityCard, Alert, FeedbackPanel, CharCount, LockedBadge, QualityFeedback } from '../ui/shared'
 
 const N = ACTIVITY_DISPLAY_NUM
@@ -14,6 +14,7 @@ function charCountClass(len: number, min: number, max: number) {
 export function Block2Panel() {
   const { team, scores, responses, updateScore, updateResponse, lockActivity } = useWorkspaceStore()
   const brand = team?.brand || 'ASOS'
+  const brandEx = BRAND_EXAMPLES[brand as keyof typeof BRAND_EXAMPLES] || BRAND_EXAMPLES['ASOS']
 
   // A4 — lock+feedback
   const a4Locked = !!responses.locked_a4
@@ -130,7 +131,7 @@ export function Block2Panel() {
           <FeedbackPanel
             score={scores.a4.points} max={5}
             why={`Title tag: ${title.length} chars (target 30–60 = 2pts, any value = 1pt). Meta: ${meta.length} chars (target 120–160 = 2pts). Keyword field: 1pt for completion.`}
-            example={`Title: "${brand} Official Store | Free Delivery on Orders Over £35 | Shop Now" — 64 chars, keyword-rich, includes brand, benefit and CTA. Meta: "Shop the latest ${brand} collections with free next-day delivery. Browse thousands of styles across clothing, shoes and accessories. Easy returns." — 148 chars.`}
+            example={`Title: "${brandEx.titleExample}" · Meta: "${brandEx.metaExample}"`}
             keyLearning={[
               'Title tags are the most important on-page SEO element — lead with the primary keyword.',
               'Meta descriptions don\'t directly affect rankings but a well-written meta significantly improves CTR.',

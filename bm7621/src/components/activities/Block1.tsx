@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspace'
-import { INTENT_KEYS, EXAMPLE_SEEDS, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
+import { INTENT_KEYS, EXAMPLE_SEEDS, BRAND_EXAMPLES, ACTIVITY_DISPLAY_NUM } from '../../data/workshop'
 import { ActivityCard, Alert, LockedBadge, FeedbackPanel, CharCount } from '../ui/shared'
 import type { Brand } from '../../types'
 
@@ -11,6 +11,7 @@ export function Block1Panel() {
   const brand = (team?.brand || 'ASOS') as Brand
   const intentKeys = INTENT_KEYS[brand]
   const examples = EXAMPLE_SEEDS[brand]
+  const brandEx = BRAND_EXAMPLES[brand]
 
   // A1 — lock+feedback
   const a1Locked = !!responses.locked_a1
