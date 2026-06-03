@@ -1,17 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'] || ''
-const supabaseKey = import.meta.env['VITE_SUPABASE_ANON_KEY'] || ''
+const supabaseUrl = 'https://abteskbtkgmplasgpekj.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFidGVza2J0a2dtcGxhc2dwZWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0ODY5MTcsImV4cCI6MjA5MTA2MjkxN30.YczwMyY4ElTJVlx4bPq01teH47HYcBZJPQAfREGPYvg'
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   realtime: { params: { eventsPerSecond: 2 } },
 })
 
-export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseKey
+export const isSupabaseConfigured = () => true
 
 // ─── TEAM OPERATIONS ────────────────────────────────────────
 export async function getTeamByCode(code: string) {
-  if (!isSupabaseConfigured()) return null
   const { data, error } = await supabase
     .from('bm7621seo_teams')
     .select('*')
@@ -22,13 +21,12 @@ export async function getTeamByCode(code: string) {
 }
 
 export async function updateTeamMembers(teamId: string, members: { name: string; order: number }[]) {
-  if (!isSupabaseConfigured()) return false
   const { data, error } = await supabase
     .from('bm7621seo_teams')
-    .update({ members: members })
+    .update({ members })
     .eq('id', teamId)
     .select()
-  console.log('[updateTeamMembers] teamId:', teamId, 'members:', members, 'result:', data, 'error:', error)
+  console.log('[updateTeamMembers]', { teamId, members, data, error })
   return !error
 }
 
@@ -38,7 +36,6 @@ export async function upsertWorkspaceData(teamId: string, payload: {
   simulators?: Record<string, unknown>
   cmo_eval?: Record<string, unknown> | null
 }) {
-  if (!isSupabaseConfigured()) return false
   const { error } = await supabase
     .from('bm7621seo_workspace_data')
     .upsert({
@@ -50,7 +47,6 @@ export async function upsertWorkspaceData(teamId: string, payload: {
 }
 
 export async function getWorkspaceData(teamId: string) {
-  if (!isSupabaseConfigured()) return null
   const { data, error } = await supabase
     .from('bm7621seo_workspace_data')
     .select('*')
@@ -61,7 +57,6 @@ export async function getWorkspaceData(teamId: string) {
 }
 
 export async function getAllTeamsData() {
-  if (!isSupabaseConfigured()) return []
   const { data, error } = await supabase
     .from('bm7621seo_teams')
     .select(`
@@ -79,7 +74,6 @@ export async function getAllTeamsData() {
 }
 
 export function subscribeToAllWorkspaces(callback: (payload: unknown) => void) {
-  if (!isSupabaseConfigured()) return () => {}
   const channel = supabase
     .channel('workspace-updates')
     .on('postgres_changes', {
@@ -92,7 +86,6 @@ export function subscribeToAllWorkspaces(callback: (payload: unknown) => void) {
 }
 
 export function subscribeToTeamWorkspace(teamId: string, callback: (payload: unknown) => void) {
-  if (!isSupabaseConfigured()) return () => {}
   const channel = supabase
     .channel(`workspace-${teamId}`)
     .on('postgres_changes', {
