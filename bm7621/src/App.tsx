@@ -31,8 +31,8 @@ const PANEL_META: Record<Panel, { title: string; subtitle: string }> = {
   exports: { title: 'Export Centre', subtitle: 'Download Your Work' },
 }
 
-function WorkshopApp() {
-  const [panel, setPanel] = useState<Panel>('mission')
+function WorkshopApp({ initialPanel }: { initialPanel?: string }) {
+  const [panel, setPanel] = useState<Panel>((initialPanel as Panel) || 'mission')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const navigate = (p: string) => {
@@ -106,7 +106,16 @@ function WorkshopApp() {
 export default function App() {
   const { team } = useWorkspaceStore()
   const [isFacilitator, setIsFacilitator] = useState(false)
+  const [resumePanel, setResumePanel] = useState<string | undefined>(undefined)
+
   if (isFacilitator) return <FacilitatorDashboard />
-  if (!team) return <SetupScreen onComplete={() => {}} onFacilitator={() => setIsFacilitator(true)} />
-  return <WorkshopApp />
+  if (!team) return (
+    <SetupScreen
+      onComplete={(block) => {
+        if (block && block > 1) setResumePanel(`block${block}`)
+      }}
+      onFacilitator={() => setIsFacilitator(true)}
+    />
+  )
+  return <WorkshopApp initialPanel={resumePanel} />
 }
